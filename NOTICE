@@ -1,0 +1,20 @@
+Metalyzr - NOTICE
+==================
+
+Ce projet intègre et/ou s'inspire des composants suivants :
+
+- mtg_decklist_scrapper (fbettega) - Licence MIT
+  https://github.com/fbettega/mtg_decklist_scrapper
+- MTGOArchetypeParser (Badaro) - Licence MIT
+  https://github.com/Badaro/MTGOArchetypeParser
+- R-Meta-Analysis (Jiliac) - Licence MIT
+  https://github.com/Jiliac/R-Meta-Analysis
+
+Merci aux auteurs originaux. Les fichiers LICENSE d'origine sont conservés dans chaque sous-dossier le cas échéant.
+
+Licence principale du projet : MIT (voir LICENSE)
+
+Mentions légales :
+- Respect de la RGPD (anonymisation, droit à l'oubli)
+- Pas d'utilisation commerciale sans accord explicite des auteurs
+- Toute réutilisation doit citer les projets et auteurs ci-dessus 
