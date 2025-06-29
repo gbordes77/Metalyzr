@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metalyzr - MTG Meta Analysis Platform</title>
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --secondary: #2563eb;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --dark: #1f2937;
+            --light: #f3f4f6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #374151;
+            background-color: #f9fafb;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navigation */
+        nav {
+            background: var(--dark);
+            color: white;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background 0.3s;
+        }
+        
+        nav a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            opacity: 0.9;
+        }
+        
+        /* Sections */
+        section {
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        h2 {
+            color: var(--dark);
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            border-bottom: 3px solid var(--primary);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        
+        h3 {
+            color: var(--dark);
+            margin: 2rem 0 1rem;
+            font-size: 1.5rem;
+        }
+        
+        h4 {
+            color: var(--dark);
+            margin: 1.5rem 0 0.5rem;
+            font-size: 1.25rem;
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        /* Code blocks */
+        pre {
+            background: var(--dark);
+            color: #e5e7eb;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        code {
+            background: #e5e7eb;
+            color: var(--dark);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+        
+        /* Lists */
+        ul, ol {
+            margin: 1rem 0 1rem 2rem;
+        }
+        
+        li {
+            margin: 0.5rem 0;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+        
+        .badge-primary { background: var(--primary); color: white; }
+        .badge-success { background: var(--success); color: white; }
+        .badge-warning { background: var(--warning); color: white; }
+        .badge-danger { background: var(--danger); color: white; }
+        
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: var(--primary);
+        }
+        
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.5rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: var(--light);
+            font-weight: 600;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            nav ul { flex-direction: column; gap: 0.5rem; }
+        }
+        
+        /* Print styles */
+        @media print {
+            nav { display: none; }
+            .card { box-shadow: none; border: 1px solid #e5e7eb; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#home">🏠 Accueil</a></li>
+                <li><a href="#context">📋 Contexte</a></li>
+                <li><a href="#architecture">🏗️ Architecture</a></li>
+                <li><a href="#roadmap">📊 Roadmap</a></li>
+                <li><a href="#tech-stack">⚙️ Stack Technique</a></li>
+                <li><a href="#status">📈 Statut Actuel</a></li>
+                <li><a href="#next-steps">🚀 Prochaines Étapes</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header id="home">
+        <div class="container">
+            <h1>🃏 Metalyzr</h1>
+            <p class="subtitle">Plateforme d'analyse du métagame Magic: The Gathering Online</p>
+            <p class="subtitle">Full-stack Data & DevOps - Budget < 5€/mois</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        
+        <!-- Section Contexte -->
+        <section id="context">
+            <h2>📋 Contexte du Projet</h2>
+            
+            <div class="card">
+                <h3>Objectif Principal</h3>
+                <p>Fournir, toutes les deux semaines, des livrables exploitables (datasets propres, dashboards, billets de synthèse) pour l'analyse du métagame MTGO en respectant un budget d'infrastructure < 5€/mois.</p>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>🎯 Formats Suivis</h4>
+                        <ul>
+                            <li>Modern</li>
+                            <li>Legacy</li>
+                            <li>Pioneer</li>
+                            <li>Pauper</li>
+                            <li>Vintage</li>
+                            <li>Standard</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>📊 Métriques Clés</h4>
+                        <ul>
+                            <li>Metagame share</li>
+                            <li>Win-rate (IC 95%)</li>
+                            <li>Match-ups analysis</li>
+                            <li>Tendances 4 semaines glissantes</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>🔄 Tâches Récurrentes</h4>
+                        <ul>
+                            <li>Scraping decklists MTGO</li>
+                            <li>ETL & normalisation</li>
+                            <li>Analyse automatisée</li>
+                            <li>Publication API/dashboard</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Architecture -->
+        <section id="architecture">
+            <h2>🏗️ Architecture Technique</h2>
+            
+            <div class="card">
+                <h3>Stack Technique Non-Négociable</h3>
+                
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>🐍 Backend</h4>
+                        <ul>
+                            <li>Python 3.10+ (asyncio, typing)</li>
+                            <li>FastAPI (OpenAPI, pagination, rate-limit)</li>
+                            <li>PostgreSQL 16 + SQLite proto</li>
+                            <li>Requests/bs4 (scraping)</li>
+                            <li>Pandas + PyArrow (ETL)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>🐳 Infrastructure</h4>
+                        <ul>
+                            <li>Docker multi-stage < 300MB</li>
+                            <li>GitHub Actions (matrix, cron, artefacts)</li>
+                            <li>Caddy + HTTPS</li>
+                            <li>CI/CD automatisé</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>📊 Data Viz</h4>
+                        <ul>
+                            <li>Streamlit (dashboard)</li>
+                            <li>Plotly Express</li>
+                            <li>Altair (visualisations)</li>
+                            <li>Export CSV/Parquet</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Sécurité & Conformité</h3>
+                <ul>
+                    <li><strong>OWASP Top 10 API</strong> : Gestion clés, CORS/jquery-nonce, quotas</li>
+                    <li><strong>RGPD</strong> : Anonymisation, droit à l'oubli</li>
+                    <li><strong>Backups</strong> : Chiffrés AES-256</li>
+                    <li><strong>Tests</strong> : pytest + VCR, flake8/ruff, pre-commit</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Roadmap -->
+        <section id="roadmap">
+            <h2>📊 Roadmap 14 Jours</h2>
+            
+            <div class="card">
+                <h3>Phase 1 : Foundation (J1-J3)</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>J1</strong> : Setup Docker multi-stage + GitHub Actions
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J2</strong> : PostgreSQL 16 + FastAPI skeleton
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J3</strong> : Tests pytest + linting pipeline
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Phase 2 : Data Pipeline (J4-J7)</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>J4-J5</strong> : Scrapers MTGO + fallbacks (Topdeck.gg, MTGGoldfish)
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J6</strong> : ETL pipeline (normalisation cartes, archetype tagging)
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J7</strong> : PostgreSQL schema versionné + index full-text
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Phase 3 : Analytics Engine (J8-J10)</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>J8</strong> : Métagame analysis (win-rate, tendances 4 semaines)
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J9</strong> : API endpoints (pagination, rate-limit)
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J10</strong> : Export CSV/Parquet versionnés
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Phase 4 : Frontend & Deployment (J11-J14)</h3>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <strong>J11-J12</strong> : Dashboard Streamlit + visualisations
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J13</strong> : Caddy + HTTPS + CORS config
+                    </div>
+                    <div class="timeline-item">
+                        <strong>J14</strong> : GitHub Actions cron (00:30 UTC) + Discord alerts
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tech Stack -->
+        <section id="tech-stack">
+            <h2>⚙️ Stack Technique Détaillée</h2>
+            
+            <div class="card">
+                <h3>Compétences MTG Impératives</h3>
+                <ul>
+                    <li>Suivi formats Modern, Legacy, Pioneer, Pauper, Vintage, Standard</li>
+                    <li>Nomenclature archétypes (Izzet Murktide, Mono-Red Burn…)</li>
+                    <li>Veille des sorties sets & rotations</li>
+                    <li>Détection émergences cartes</li>
+                    <li>Interprétation % win-rate (IC 95%) et match-ups</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Pipeline de Données</h3>
+                <pre><code>1. Scrape decklists MTGO + fallback
+   └─→ Topdeck.gg, MTGGoldfish, Melee.gg
+   
+2. Parse & normalise (ETL)
+   └─→ Normalisation nom cartes, archetype tagging
+   
+3. Load en PostgreSQL
+   └─→ Schéma versionné, index full-text
+   
+4. Analyse
+   └─→ Metagame share, win-rate, tendances
+   
+5. Publie
+   └─→ API / CSV / Parquet versionnées
+   └─→ Dashboard Streamlit
+   └─→ Post récap EN/FR</code></pre>
+            </div>
+
+            <div class="card">
+                <h3>Contraintes Techniques</h3>
+                <table>
+                    <tr>
+                        <th>Contrainte</th>
+                        <th>Valeur</th>
+                        <th>Justification</th>
+                    </tr>
+                    <tr>
+                        <td>Budget infra</td>
+                        <td>< 5€/mois</td>
+                        <td>Projet communautaire</td>
+                    </tr>
+                    <tr>
+                        <td>Temps pipeline</td>
+                        <td>≤ 15 min</td>
+                        <td>Fréquence bi-hebdomadaire</td>
+                    </tr>
+                    <tr>
+                        <td>Coverage tests</td>
+                        <td>≥ 90%</td>
+                        <td>Fiabilité données</td>
+                    </tr>
+                    <tr>
+                        <td>Docker image</td>
+                        <td>< 300 MB</td>
+                        <td>Déploiement rapide</td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- Status -->
+        <section id="status">
+            <h2>📈 Statut Actuel</h2>
+            
+            <div class="card">
+                <h3>État du Projet</h3>
+                <div class="card-grid">
+                    <div class="card">
+                        <h4>✅ Réalisé</h4>
+                        <ul>
+                            <li>Repository GitHub créé</li>
+                            <li>Analyse des besoins</li>
+                            <li>Architecture définie</li>
+                            <li>Roadmap établie</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>🔄 En Cours</h4>
+                        <ul>
+                            <li>Setup environnement</li>
+                            <li>Structure projet</li>
+                            <li>Premier commit</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card">
+                        <h4>⏳ À Faire</h4>
+                        <ul>
+                            <li>Docker setup</li>
+                            <li>FastAPI skeleton</li>
+                            <li>Scrapers MTGO</li>
+                            <li>Dashboard Streamlit</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>Métriques de Succès</h3>
+                <table>
+                    <tr>
+                        <th>Métrique</th>
+                        <th>Objectif</th>
+                        <th>Statut</th>
+                    </tr>
+                    <tr>
+                        <td>Scrapers fonctionnels</td>
+                        <td>100% formats</td>
+                        <td><span class="badge badge-warning">En cours</span></td>
+                    </tr>
+                    <tr>
+                        <td>Pipeline automatisé</td>
+                        <td>≤ 15 min</td>
+                        <td><span class="badge badge-danger">À faire</span></td>
+                    </tr>
+                    <tr>
+                        <td>Coverage tests</td>
+                        <td>≥ 90%</td>
+                        <td><span class="badge badge-danger">À faire</span></td>
+                    </tr>
+                    <tr>
+                        <td>Budget mensuel</td>
+                        <td>< 5€</td>
+                        <td><span class="badge badge-success">OK</span></td>
+                    </tr>
+                </table>
+            </div>
+        </section>
+
+        <!-- Next Steps -->
+        <section id="next-steps">
+            <h2>🚀 Prochaines Étapes Immédiates</h2>
+            
+            <div class="card">
+                <h3>Actions J+1</h3>
+                <ol>
+                    <li>
+                        <strong>Structure Projet</strong>
+                        <pre><code>mkdir -p {backend,frontend,data,scripts,tests,docs,infra}
+touch README.md .gitignore docker-compose.yml</code></pre>
+                    </li>
+                    
+                    <li>
+                        <strong>Premier Commit</strong>
+                        <pre><code>git add .
+git commit -m "feat: initial project structure"
+git push origin main</code></pre>
+                    </li>
+                    
+                    <li>
+                        <strong>Docker Setup</strong>
+                        <pre><code>docker-compose up -d postgres redis
+docker build -t metalyzr .</code></pre>
+                    </li>
+                </ol>
+            </div>
+
+            <div class="card">
+                <h3>Livrables Semaine 1</h3>
+                <ul>
+                    <li>✅ Structure projet complète</li>
+                    <li>✅ Docker multi-stage < 300MB</li>
+                    <li>✅ FastAPI skeleton avec 3 endpoints</li>
+                    <li>✅ PostgreSQL schema v1.0</li>
+                    <li>✅ GitHub Actions CI/CD</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Livrables Semaine 2</h3>
+                <ul>
+                    <li>✅ Scrapers MTGO fonctionnels</li>
+                    <li>✅ ETL pipeline basique</li>
+                    <li>✅ Dashboard Streamlit MVP</li>
+                    <li>✅ API publique (3 endpoints)</li>
+                    <li>✅ Tests coverage ≥ 70%</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h3>Questions Techniques Ouvertes</h3>
+                <ol>
+                    <li>Quelle stratégie de fallback pour les scrapers MTGO ?</li>
+                    <li>Comment gérer les changements de structure MTGO.com ?</li>
+                    <li>Quelle fréquence optimale pour les analyses ?</li>
+                    <li>Comment optimiser les performances PostgreSQL ?</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section>
+            <div class="card" style="background: linear-gradient(135deg, #7c3aed, #2563eb); color: white;">
+                <h2 style="color: white; border-bottom-color: white;">🎯 Conclusion</h2>
+                <p>Metalyzr vise à devenir LA plateforme de référence pour l'analyse du métagame MTGO, en respectant des contraintes strictes de budget et de performance.</p>
+                <p>Approche pragmatique : <strong>Start small, ship fast, iterate based on real usage!</strong></p>
+                <p><strong>Prochain objectif</strong> : MVP fonctionnel en 14 jours avec pipeline automatisé.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer style="background: var(--dark); color: white; padding: 2rem 0; text-align: center; margin-top: 4rem;">
+        <div class="container">
+            <p>Metalyzr - MTG Meta Analysis Platform</p>
+            <p>Repository: <a href="https://github.com/gbordes77/Metalyzr" style="color: white;">github.com/gbordes77/Metalyzr</a></p>
+            <p>Document généré le 29 juin 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling pour la navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Highlight de la section active dans la nav
+        window.addEventListener('scroll', () => {
+            let current = '';
+            document.querySelectorAll('section').forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            document.querySelectorAll('nav a').forEach(a => {
+                a.style.background = '';
+                if (a.getAttribute('href').slice(1) === current) {
+                    a.style.background = 'rgba(255,255,255,0.2)';
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
