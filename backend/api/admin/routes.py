@@ -13,7 +13,7 @@ class DetectionRuleCreate: pass
 class DeckValidation: pass
 class VisualizationConfig: pass
 
-from ...services import ArchetypeService
+# from ...services import ArchetypeService  # Temporarily commented until service is properly structured
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 

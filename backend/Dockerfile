@@ -1,22 +1,3 @@
-FROM python:3.11-slim AS builder
-
-# Install poetry
-RUN apt-get update && apt-get install -y curl && \
-    curl -sSL https://install.python-poetry.org | python3 - && \
-    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
-
-WORKDIR /app
-
-# Configure poetry to create a virtual environment in the project's directory
-RUN poetry config virtualenvs.in-project true
-
-# Copy dependency definition files
-COPY pyproject.toml poetry.lock* ./
-
-# Install dependencies
-RUN poetry install --no-interaction --no-ansi --no-root --without dev
-
-# Stage 2: Final application stage
 FROM python:3.11-slim
 
 WORKDIR /app
@@ -24,19 +5,29 @@ WORKDIR /app
 # Créer un utilisateur et un groupe non-root pour la sécurité
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Copier l'environnement virtuel et le code, puis définir les permissions
-COPY --from=builder /app/.venv /app/.venv
+# Install poetry
+RUN apt-get update && apt-get install -y curl && \
+    curl -sSL https://install.python-poetry.org | python3 - && \
+    ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+
+# Copy dependency definition files
+COPY pyproject.toml poetry.lock* ./
+
+# Install dependencies directly in the system Python (no virtual env)
+RUN poetry config virtualenvs.create false && \
+    poetry install --no-interaction --no-ansi --no-root --without dev
+
+# Copy application code
 COPY . .
 RUN chown -R appuser:appgroup /app
-
-# On liste le contenu du répertoire bin pour le débogage
-RUN ls -la /app/.venv/bin
 
 # Changer d'utilisateur pour ne pas exécuter en root
 USER appuser
 
 EXPOSE 8000
 
-# Commande pour démarrer l'application.
-# On pointe vers le module Python correct : app.main:app
-CMD ["/app/.venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Set Python path
+ENV PYTHONPATH="/app"
+
+# Commande pour démarrer l'application
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 

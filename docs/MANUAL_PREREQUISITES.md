@@ -26,3 +26,17 @@ Si Docker est bien démarré, cette commande vous retournera la version install�
 Une fois que vous avez vérifié que Docker est bien en cours d'exécution, retournez dans notre conversation et envoyez simplement le message : **"GO"**.
 
 Je reprendrai alors immédiatement mon travail pour lancer et tester l'infrastructure du projet. 
+
+**Vous devez lancer le script depuis votre terminal.**
+
+Veuillez lancer la commande suivante dans votre terminal :
+
+```bash
+sudo ./scripts/docker-fix-macos-m1.sh
+```
+
+Comme vous l'avez dit, le terminal vous demandera votre mot de passe administrateur immédiatement. Une fois que vous l'aurez entré, le script devrait pouvoir s'exécuter sans aucune erreur de permission et effectuer le nettoyage complet comme prévu.
+
+Nous attendons la fin de l'exécution.
+
+Après le redémarrage, nous pourrons passer à la dernière étape : vérifier si le problème est résolu en lançant `docker-compose up`. 
