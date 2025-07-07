@@ -1,0 +1,112 @@
+export const mockHandlers = {
+  '/api/stats': {
+    tournaments: 42,
+    archetypes: 15,
+    decks: 358
+  },
+  
+  '/health': {
+    status: 'healthy',
+    service: 'metalyzr-api',
+    uptime: 99.95,
+    lastCheck: new Date().toISOString()
+  },
+  
+  '/api/tournaments/': {
+    success: true,
+    data: [
+      {
+        id: 1,
+        name: "Modern Challenge #12345",
+        date: "2025-01-01",
+        format: "Modern",
+        player_count: 128,
+        location: "MTGO",
+        status: "completed"
+      },
+      {
+        id: 2,
+        name: "Legacy Showcase",
+        date: "2025-01-02", 
+        format: "Legacy",
+        player_count: 64,
+        location: "Local Store",
+        status: "completed"
+      }
+    ],
+    meta: { count: 2 }
+  },
+  
+  '/api/archetypes/': {
+    success: true,
+    data: [
+      {
+        id: 1,
+        name: "Mono-Red Aggro",
+        description: "Archétype aggro rapide",
+        color_identity: "R",
+        deck_count: 45
+      },
+      {
+        id: 2,
+        name: "Azorius Control",
+        description: "Contrôle blanc-bleu",
+        color_identity: "WU", 
+        deck_count: 32
+      },
+      {
+        id: 3,
+        name: "Golgari Midrange",
+        description: "Midrange noir-vert",
+        color_identity: "BG",
+        deck_count: 28
+      }
+    ],
+    meta: { count: 3 }
+  },
+  
+  '/api/tournaments/recent': {
+    success: true,
+    data: [],
+    meta: { count: 0 }
+  },
+  
+  '/api/archetypes/popular': {
+    success: true,
+    data: [],
+    meta: { count: 0 }
+  }
+};
+
+// Configuration pour utiliser les mocks en développement
+export const shouldUseMocks = process.env.NODE_ENV === 'development' && 
+                             process.env.REACT_APP_USE_MOCKS === 'true';
+
+// Mock fetch pour intercepter les requêtes en développement
+export function setupMockAPI() {
+  if (!shouldUseMocks) return;
+  
+  const originalFetch = global.fetch;
+  
+  global.fetch = new Proxy(originalFetch, {
+    apply(target, thisArg, args: [input: RequestInfo | URL, init?: RequestInit]) {
+      const [url] = args;
+      
+      // Chercher un mock correspondant
+      for (const [path, response] of Object.entries(mockHandlers)) {
+        if (url.toString().includes(path)) {
+          console.log(`🔄 Mock API: ${path}`, response);
+          return Promise.resolve(new Response(JSON.stringify(response), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }));
+        }
+      }
+      
+      // Si pas de mock, utiliser fetch normal
+      return target.apply(thisArg, args);
+    }
+  });
+  
+  console.log('🎭 Mock API activé pour le développement');
+} 

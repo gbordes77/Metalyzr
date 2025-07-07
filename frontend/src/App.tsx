@@ -3,6 +3,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import PublicDashboard from './pages/public/PublicDashboard';
 import TournamentDetails from './pages/public/TournamentDetails';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import { setupMockAPI } from './api/mockHandlers';
+
+// Initialiser les mocks API pour le développement
+setupMockAPI();
 
 function App() {
   return (
