@@ -60,5 +60,23 @@ services:
       timeout: 5s
       retries: 5
 
+  scraper:
+    build:
+      context: ./scraper
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/metalyzr
+      - REQUEST_DELAY=2.0
+      - MAX_CONCURRENT_REQUESTS=3
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./scraper/logs:/app/logs
+    command: ["python", "main.py", "--stats-only"]
+
 volumes:
   postgres_data: 
