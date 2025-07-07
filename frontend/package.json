@@ -27,6 +27,14 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:coverage": "react-scripts test --coverage --watchAll=false",
+    "test:ci": "react-scripts test --watchAll=false --verbose",
+    "test:all": "./scripts/test-all.sh",
+    "test:validate": "./run-all-tests.sh",
+    "test:unit": "react-scripts test --testPathPattern=src/tests --watchAll=false",
+    "test:integration": "react-scripts test --testPathPattern=integration --watchAll=false",
+    "validate:server": "python3 validate-server.py",
+    "start:fixed": "./start-fixed.sh",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -49,6 +57,24 @@
   },
   "devDependencies": {
     "tailwindcss": "^3.4.3"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx,ts,tsx}",
+      "!src/index.tsx",
+      "!src/reportWebVitals.ts",
+      "!src/**/*.d.ts",
+      "!src/api/mockHandlers.ts"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 70,
+        "functions": 70,
+        "lines": 80,
+        "statements": 80
+      }
+    },
+    "setupFilesAfterEnv": ["<rootDir>/src/tests/setupTests.ts"]
   },
   "proxy": "http://localhost:8000"
 }
