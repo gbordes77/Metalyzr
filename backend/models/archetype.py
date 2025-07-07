@@ -26,7 +26,7 @@ class Archetype(Base):
     
     # Relations
     rules = relationship("DetectionRule", secondary=archetype_rules, back_populates="archetypes")
-    # decks = relationship("Deck", back_populates="archetype") # Will be uncommented when Deck model is created
+    decks = relationship("Deck", back_populates="archetype")
     
 class DetectionRule(Base):
     __tablename__ = 'detection_rules'
