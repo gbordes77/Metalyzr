@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guide : Stockage des données Metalyzr sur GitHub</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; color: #1f2937; margin: 0; padding: 0; }
+        .container { max-width: 800px; margin: 0 auto; padding: 2rem; }
+        h1, h2, h3 { color: #7c3aed; }
+        h1 { font-size: 2.2rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.5rem; margin-top: 2rem; }
+        h3 { font-size: 1.2rem; margin-top: 1.5rem; }
+        ul, ol { margin-left: 2rem; }
+        pre { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+        code { background: #e5e7eb; color: #1f2937; padding: 0.2rem 0.4rem; border-radius: 0.25rem; }
+        .tip { background: #e0e7ff; border-left: 4px solid #7c3aed; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0.25rem; }
+        .danger { background: #fee2e2; border-left: 4px solid #ef4444; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0.25rem; }
+        .success { background: #d1fae5; border-left: 4px solid #10b981; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0.25rem; }
+        a { color: #2563eb; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🗃️ Guide : Stockage des données Metalyzr sur GitHub</h1>
+    <div class="tip">
+        <strong>Objectif :</strong> Stocker et partager les données volumineuses (dumps, exports, Parquet) de Metalyzr dans un dépôt GitHub séparé, simple à cloner et à versionner.
+    </div>
+
+    <h2>1. Pourquoi un dépôt GitHub séparé ?</h2>
+    <ul>
+        <li>Évite de polluer le monorepo code avec des fichiers lourds</li>
+        <li>Permet de partager facilement les datasets avec la communauté</li>
+        <li>Facilite la gestion des versions et l'archivage</li>
+        <li>Pas de coût supplémentaire pour des volumes raisonnables (&lt;1 Go/mois)</li>
+    </ul>
+
+    <h2>2. Création du dépôt Metalyzr-data</h2>
+    <ol>
+        <li>Sur GitHub, créez un nouveau dépôt public ou privé nommé <code>Metalyzr-data</code></li>
+        <li>Ajoutez un <code>README.md</code> et un <code>.gitignore</code> (optionnel : <code>*.parquet</code>, <code>*.json</code>)</li>
+        <li>Organisez les données par date et format :
+            <pre><code>Metalyzr-data/
+└── dumps/
+    ├── 2025-07-01/
+    │   └── modern.parquet
+    └── 2025-07-08/
+        └── ...</code></pre>
+        </li>
+    </ol>
+
+    <h2>3. Bonnes pratiques</h2>
+    <ul>
+        <li>Ne stockez pas plus de 1 Go de données (limite GitHub standard)</li>
+        <li>Pour de gros fichiers (&gt;100 Mo), utilisez <a href="https://git-lfs.com/" target="_blank">Git LFS</a></li>
+        <li>Nettoyez régulièrement les anciens dumps pour éviter la saturation</li>
+        <li>Ajoutez un <code>fetch-data</code> dans le Makefile du monorepo pour cloner/synchroniser les dumps</li>
+        <li>Documentez la structure et l'usage dans le <code>README.md</code> du dépôt data</li>
+    </ul>
+
+    <h2>4. Commandes utiles</h2>
+    <ul>
+        <li><strong>Cloner le dépôt data :</strong><br>
+            <pre><code>git clone https://github.com/gbordes77/Metalyzr-data.git</code></pre>
+        </li>
+        <li><strong>Ajouter un dump :</strong><br>
+            <pre><code>cp nouveau_dump.parquet Metalyzr-data/dumps/2025-07-08/
+cd Metalyzr-data
+git add .
+git commit -m "data: add dump 2025-07-08"
+git push</code></pre>
+        </li>
+        <li><strong>Mettre à jour localement :</strong><br>
+            <pre><code>cd Metalyzr-data
+git pull</code></pre>
+        </li>
+    </ul>
+
+    <h2>5. Points de vigilance</h2>
+    <ul>
+        <li>Ne jamais versionner de données dans le monorepo code</li>
+        <li>Respecter la politique de confidentialité (RGPD, anonymisation si besoin)</li>
+        <li>Si le volume explose, migrer vers un bucket cloud (voir guide à venir)</li>
+    </ul>
+
+    <div class="success">
+        <strong>En résumé :</strong> Créez le dépôt, organisez les dumps, documentez, et synchronisez !<br>
+        <strong>Besoin d'aide ?</strong> Consultez la <a href="https://docs.github.com/en/repositories/working-with-files/managing-large-files" target="_blank">doc GitHub sur les gros fichiers</a> ou demandez à l'IA.
+    </div>
+</div>
+</body>
+</html> 

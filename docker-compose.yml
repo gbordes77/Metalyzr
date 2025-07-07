@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../infrastructure/docker/backend.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      - DATABASE_URL=postgresql://user:password@postgres:5432/metalyzr
+      - REDIS_URL=redis://redis:6379
+      - ENVIRONMENT=development
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../infrastructure/docker/frontend.Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - CHOKIDAR_USEPOLLING=true
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: metalyzr_postgres
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: metalyzr
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d metalyzr"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: metalyzr_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data: 

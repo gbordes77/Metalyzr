@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metalyzr - Architecture technique</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f9fafb; color: #1f2937; margin: 0; padding: 0; }
+        .container { max-width: 900px; margin: 0 auto; padding: 2rem; }
+        h1, h2, h3 { color: #7c3aed; }
+        h1 { font-size: 2.2rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.5rem; margin-top: 2rem; }
+        h3 { font-size: 1.2rem; margin-top: 1.5rem; }
+        ul, ol { margin-left: 2rem; }
+        pre { background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
+        code { background: #e5e7eb; color: #1f2937; padding: 0.2rem 0.4rem; border-radius: 0.25rem; }
+        .toc { background: #e0e7ff; border-left: 4px solid #7c3aed; padding: 1rem; margin: 2rem 0; border-radius: 0.25rem; }
+        .section { margin-bottom: 2.5rem; }
+        a { color: #2563eb; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🛠️ Metalyzr - Architecture technique</h1>
+    <div class="toc">
+        <strong>Table des matières</strong>
+        <ul>
+            <li><a href="#schema">Schéma global</a></li>
+            <li><a href="#diagrammes">Diagrammes Mermaid</a></li>
+            <li><a href="#composants">Explications des composants</a></li>
+            <li><a href="#liens">Liens utiles</a></li>
+        </ul>
+    </div>
+
+    <div class="section" id="schema">
+        <h2>1. Schéma global</h2>
+        <p>Architecture monorepo : code, data, CI/CD, API, dashboard.</p>
+        <pre><code>+-------------------+         +-------------------+
+|   Utilisateur     | &lt;----&gt; |   Dashboard       |
++-------------------+         +-------------------+
+         |                             |
+         v                             v
++-------------------+         +-------------------+
+|     API (FastAPI) | &lt;----&gt; |   PostgreSQL      |
++-------------------+         +-------------------+
+         ^                             ^
+         |                             |
++-------------------+         +-------------------+
+|   ETL / Scraper   | &lt;----&gt; |   Metalyzr-data   |
++-------------------+         +-------------------+
+         ^
+         |
++-------------------+
+|   CI/CD (GitHub)  |
++-------------------+
+</code></pre>
+    </div>
+
+    <div class="section" id="diagrammes">
+        <h2>2. Diagrammes Mermaid (flux de données)</h2>
+        <pre><code>graph TD
+    A[Scraper Python] --&gt; B[ETL/Parser]
+    B --&gt; C[Base PostgreSQL]
+    C --&gt; D[API FastAPI]
+    D --&gt; E[Dashboard Streamlit]
+    B --&gt; F[Export Parquet/CSV]
+    F --&gt; G[Metalyzr-data]
+    G --&gt; B
+    C --&gt; G
+</code></pre>
+        <p>Ce diagramme illustre le pipeline complet : scraping, parsing, stockage, API, visualisation, et export des données.</p>
+    </div>
+
+    <div class="section" id="composants">
+        <h2>3. Explications des composants</h2>
+        <ul>
+            <li><strong>Monorepo code</strong> : tout le code (scraper, parser, analysis, infra, docs) dans <code>gbordes77/Metalyzr</code></li>
+            <li><strong>Metalyzr-data</strong> : dépôt GitHub séparé pour les dumps (Parquet, CSV, JSON)</li>
+            <li><strong>Scraper</strong> : collecte les decklists MTGO et fallback (Topdeck.gg, etc.)</li>
+            <li><strong>ETL/Parser</strong> : normalisation, tagging, transformation des données</li>
+            <li><strong>PostgreSQL</strong> : stockage relationnel, index full-text, versionnement</li>
+            <li><strong>API FastAPI</strong> : endpoints REST, pagination, rate-limit, sécurité</li>
+            <li><strong>Dashboard Streamlit</strong> : visualisation interactive, graphiques, export</li>
+            <li><strong>CI/CD GitHub Actions</strong> : pipeline automatisé (scrape, parse, analyse, push data)</li>
+            <li><strong>Docs</strong> : HTML, README, guides, schémas, suivi</li>
+        </ul>
+    </div>
+
+    <div class="section" id="liens">
+        <h2>4. Liens utiles</h2>
+        <ul>
+            <li><a href="../index.html">Vision & plan global</a></li>
+            <li><a href="etat-des-lieux.html">État des lieux & suivi</a></li>
+            <li><a href="aws-bucket-setup.html">Guide stockage GitHub data</a></li>
+            <li><a href="../README.md">README principal</a></li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

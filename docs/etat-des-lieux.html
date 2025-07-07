@@ -25,18 +25,11 @@
         .danger { background: #fee2e2; border-left: 4px solid #ef4444; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0.25rem; }
         .success { background: #d1fae5; border-left: 4px solid #10b981; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 0.25rem; }
         a { color: #2563eb; }
-        .highlight { background: #fef9c3; border-left: 4px solid #f59e0b; padding: 1rem; margin: 1rem 0; border-radius: 0.25rem; font-weight: bold; }
     </style>
 </head>
 <body>
 <div class="container">
     <h1>📝 Metalyzr - État des lieux & Suivi</h1>
-    <div class="highlight">
-        🎯 <strong>Priorité MVP : Exposition des données enrichies (post-processing, visualisation, exports) — pas de data brute.</strong><br>
-        📊 <strong>Dashboard & exports = livrables principaux.</strong><br>
-        🔒 <strong>API publique = bonus, lecture seule, sécurisée (rate-limit, monitoring, pagination obligatoire).</strong><br>
-        ⚠️ <strong>Risque DDoS/API abuse identifié : mesures de sécurité prévues (voir section Sécurité).</strong>
-    </div>
     <div class="tip">
         <strong>Ce document synthétise l'état du projet Metalyzr pour revue par un expert et assure le suivi des actions à ne pas oublier.</strong>
     </div>
@@ -47,7 +40,6 @@
             <li>Plateforme open-source d'analyse du métagame Magic: The Gathering Online (MTGO)</li>
             <li>Livrables bi-hebdomadaires : datasets propres, dashboards, synthèses</li>
             <li>Contraintes : budget infra < 5€/mois, pipeline ≤ 15 min, RGPD, sécurité, documentation exhaustive</li>
-            <li><strong>Focus MVP : publication de données enrichies, visualisation, export. API publique = option sécurisée.</strong></li>
         </ul>
     </div>
 
@@ -58,7 +50,7 @@
             <li><strong>Stockage data</strong> : dépôt GitHub séparé <code>Metalyzr-data</code> (<a href="aws-bucket-setup.html">guide</a>)</li>
             <li><strong>CI/CD</strong> : GitHub Actions (pipeline nightly, secrets, artefacts)</li>
             <li><strong>Data viz</strong> : Streamlit, Plotly, Altair</li>
-            <li><strong>API</strong> : FastAPI, PostgreSQL, Caddy/HTTPS (lecture seule, rate-limit, monitoring)</li>
+            <li><strong>API</strong> : FastAPI, PostgreSQL, Caddy/HTTPS</li>
         </ul>
     </div>
 
@@ -86,8 +78,6 @@
             <tr class="todo"><td>Import analysis (subtree)</td><td>gbordes77</td><td>⏳ À faire</td><td></td></tr>
             <tr class="todo"><td>Setup CI/CD pipeline</td><td>IA</td><td>⏳ À faire</td><td>GitHub Actions</td></tr>
             <tr class="todo"><td>Makefile orchestration</td><td>IA</td><td>⏳ À faire</td><td></td></tr>
-            <tr class="todo"><td>Dashboard & exports (priorité MVP)</td><td>IA</td><td>⏳ À faire</td><td>Livrable principal</td></tr>
-            <tr class="todo"><td>API publique (lecture seule, sécurisée)</td><td>IA</td><td>⏳ À faire</td><td>Rate-limit, monitoring, pagination</td></tr>
             <tr class="todo"><td>Documentation technique détaillée</td><td>IA</td><td>⏳ À faire</td><td>docs/architecture.html</td></tr>
             <tr class="todo"><td>Définir politique gestion secrets</td><td>gbordes77</td><td>⏳ À faire</td><td>GitHub Secrets</td></tr>
             <tr class="todo"><td>Validation expert</td><td>Expert externe</td><td>⏳ À faire</td><td>Section commentaire ci-dessous</td></tr>
@@ -97,9 +87,7 @@
     <div class="section">
         <h2>5. Points d'attention & recommandations</h2>
         <ul>
-            <li><strong>Ne jamais versionner de données brutes dans le monorepo code</strong></li>
-            <li><strong>Priorité à la publication de données enrichies, visualisation, export</strong></li>
-            <li><strong>API publique = lecture seule, rate-limit, monitoring, pagination obligatoire</strong></li>
+            <li>Ne jamais versionner de données lourdes dans le monorepo code</li>
             <li>Respecter la licence MIT et les notices des projets intégrés</li>
             <li>Stocker tous les secrets dans GitHub Secrets, jamais dans le code</li>
             <li>Nettoyer régulièrement le repo data pour éviter la saturation</li>
@@ -109,30 +97,17 @@
     </div>
 
     <div class="section">
-        <h2>6. Sécurité & risques (DDoS, API abuse)</h2>
-        <ul>
-            <li><strong>Risque DDoS/API abuse identifié</strong> : API publique exposée uniquement en lecture, avec rate-limit strict (ex : 60 req/min/IP), pagination obligatoire, monitoring Prometheus/logs</li>
-            <li>Endpoints lourds limités, pas de dump massif via API</li>
-            <li>Logs d'accès, alertes sur usage anormal</li>
-            <li>API privée ou sur whitelist possible au début</li>
-            <li>Voir <a href="../SECURITY.md">SECURITY.md</a> pour la politique complète</li>
-        </ul>
-    </div>
-
-    <div class="section">
-        <h2>7. Commentaires / Validation expert</h2>
+        <h2>6. Commentaires / Validation expert</h2>
         <div class="tip">Zone libre pour remarques, suggestions, validation ou questions de l'expert.</div>
     </div>
 
     <div class="section">
-        <h2>8. Liens utiles</h2>
+        <h2>7. Liens utiles</h2>
         <ul>
             <li><a href="../index.html">Vision & plan global</a></li>
             <li><a href="aws-bucket-setup.html">Guide stockage GitHub data</a></li>
             <li><a href="../README.md">README principal</a></li>
-            <li><a href="architecture.html">Doc technique</a></li>
-            <li><a href="../SECURITY.md">Sécurité & gestion des risques</a></li>
-            <li><a href="usage.html">Guide utilisateur</a></li>
+            <li><a href="architecture.html">Doc technique (à venir)</a></li>
         </ul>
     </div>
 </div>
