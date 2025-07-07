@@ -29,10 +29,14 @@ COPY --from=builder /app/.venv /app/.venv
 COPY . .
 RUN chown -R appuser:appgroup /app
 
+# On liste le contenu du répertoire bin pour le débogage
+RUN ls -la /app/.venv/bin
+
 # Changer d'utilisateur pour ne pas exécuter en root
 USER appuser
 
 EXPOSE 8000
 
-# Command to run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Commande pour démarrer l'application.
+# On pointe vers le module Python correct : app.main:app
+CMD ["/app/.venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"] 
