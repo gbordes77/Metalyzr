@@ -1,3 +1,4 @@
+
 # Metalyzr - Guide Technique Approfondi
 
 Ce document fournit une analyse détaillée de l'architecture, de la structure du code et des configurations du projet Metalyzr. Il est destiné à des experts techniques ayant une bonne connaissance de Docker, Python (FastAPI), et React.
