@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Search, Filter, TrendingUp, TrendingDown, Calendar, Download, BarChart3, PieChart as PieChartIcon, Activity } from 'lucide-react';
+import { PieChart as RechartsChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+
 // Placeholders for shadcn/ui components
 const Card = ({ children, ...props }: any) => <div {...props} className="border rounded-lg shadow-sm">{children}</div>;
 const CardHeader = ({ children, ...props }: any) => <div {...props} className="p-4 border-b">{children}</div>;
@@ -16,9 +19,6 @@ const Tabs = ({ children, ...props }: any) => <div>{children}</div>;
 const TabsContent = ({ children, ...props }: any) => <div>{children}</div>;
 const TabsList = ({ children, ...props }: any) => <div className="flex border-b">{children}</div>;
 const TabsTrigger = ({ children, ...props }: any) => <button {...props} className="px-4 py-2 -mb-px border-b-2 border-transparent hover:border-gray-800">{children}</button>;
-
-import { Search, Filter, TrendingUp, TrendingDown, Calendar, Download, BarChart3, PieChart as PieChartIcon, Activity } from 'lucide-react';
-import { PieChart as RechartsChart, Pie, Cell, ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 const PublicDashboard = () => {
   const [metagameData, setMetagameData] = useState<any[]>([]);

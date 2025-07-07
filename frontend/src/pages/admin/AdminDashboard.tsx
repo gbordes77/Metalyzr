@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { PlusCircle, Save, Trash2, AlertCircle, CheckCircle, Search, Filter } from 'lucide-react';
 
 // Placeholders for shadcn/ui components
 const Card = ({ children, ...props }: any) => <div {...props} className="border rounded-lg shadow-sm">{children}</div>;
@@ -18,8 +19,6 @@ const Tabs = ({ children, ...props }: any) => <div>{children}</div>;
 const TabsContent = ({ children, ...props }: any) => <div>{children}</div>;
 const TabsList = ({ children, ...props }: any) => <div className="flex border-b">{children}</div>;
 const TabsTrigger = ({ children, ...props }: any) => <button {...props} className="px-4 py-2 -mb-px border-b-2 border-transparent hover:border-gray-800">{children}</button>;
-
-import { PlusCircle, Save, Trash2, AlertCircle, CheckCircle, Search, Filter } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [archetypes, setArchetypes] = useState<any[]>([]);
