@@ -1,196 +1,271 @@
-import React, { useState, useEffect } from 'react';
-import { PlusCircle, Save, Trash2, AlertCircle, CheckCircle, Search, Filter } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useTournaments, useArchetypes } from '../../hooks/useApi';
+import { LoadingSpinner } from '../../components/ui/LoadingSpinner';
+import { ErrorMessage } from '../../components/ui/ErrorMessage';
+import { Card } from '../../components/ui/Card';
+import { 
+  ArrowLeft, 
+  Database, 
+  Download, 
+  Play, 
+  Settings, 
+  TrendingUp, 
+  Users, 
+  Activity,
+  RefreshCw
+} from 'lucide-react';
 
-// Placeholders for shadcn/ui components
-const Card = ({ children, ...props }: any) => <div {...props} className="border rounded-lg shadow-sm">{children}</div>;
-const CardHeader = ({ children, ...props }: any) => <div {...props} className="p-4 border-b">{children}</div>;
-const CardTitle = ({ children, ...props }: any) => <h3 {...props} className="font-semibold text-lg">{children}</h3>;
-const CardContent = ({ children, ...props }: any) => <div {...props} className="p-4">{children}</div>;
-const Button = ({ children, ...props }: any) => <button {...props} className="bg-gray-800 text-white px-4 py-2 rounded">{children}</button>;
-const Input = (props: any) => <input {...props} className="border p-2 rounded w-full" />;
-const Label = ({ children, ...props }: any) => <label {...props} className="block mb-1 font-medium">{children}</label>;
-const Select = ({ children, ...props }: any) => <select {...props} className="border p-2 rounded w-full">{children}</select>;
-const SelectContent = ({ children, ...props }: any) => <>{children}</>;
-const SelectItem = ({ children, ...props }: any) => <option {...props}>{children}</option>;
-const SelectTrigger = ({ children, ...props }: any) => <div>{children}</div>;
-const SelectValue = (props: any) => <span {...props} />;
-const Badge = ({ children, ...props }: any) => <span {...props} className="bg-gray-200 text-gray-800 px-2 py-1 rounded-full text-sm">{children}</span>;
-const Tabs = ({ children, ...props }: any) => <div>{children}</div>;
-const TabsContent = ({ children, ...props }: any) => <div>{children}</div>;
-const TabsList = ({ children, ...props }: any) => <div className="flex border-b">{children}</div>;
-const TabsTrigger = ({ children, ...props }: any) => <button {...props} className="px-4 py-2 -mb-px border-b-2 border-transparent hover:border-gray-800">{children}</button>;
+const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  
+  const { 
+    data: tournaments, 
+    loading: tournamentsLoading, 
+    error: tournamentsError,
+    refetch: refetchTournaments
+  } = useTournaments({ limit: 10 });
+  
+  const { 
+    data: archetypes, 
+    loading: archetypesLoading, 
+    error: archetypesError,
+    refetch: refetchArchetypes
+  } = useArchetypes();
 
-const AdminDashboard = () => {
-  const [archetypes, setArchetypes] = useState<any[]>([]);
-  const [selectedArchetype, setSelectedArchetype] = useState<any>(null);
-  const [pendingDecks, setPendingDecks] = useState<any[]>([]);
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([refetchTournaments(), refetchArchetypes()]);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-  // Mock data pour démonstration
-  useEffect(() => {
-    setArchetypes([
-      {
-        id: 1,
-        name: "Mono-Red Aggro",
-        format: "Standard",
-        category: "Aggro",
-        confidence: 95,
-        deckCount: 247,
-        lastSeen: "2025-01-07",
-      },
-      {
-        id: 2,
-        name: "Azorius Control",
-        format: "Standard",
-        category: "Control",
-        confidence: 88,
-        deckCount: 189,
-        lastSeen: "2025-01-07",
-      }
-    ]);
-
-    setPendingDecks([
-      {
-        id: 101,
-        player: "ProPlayer123",
-        tournament: "Regional Championship",
-        suggestedArchetype: "Mono-Red Aggro",
-        confidence: 78,
-      }
-    ]);
-  }, []);
-
-  const ArchetypeManager = () => (
-    <div className="space-y-6">
-      {/* Barre de recherche et filtres */}
-      <div className="flex gap-4 items-end">
-        <div className="flex-1">
-          <Label>Rechercher un archétype</Label>
-          <div className="relative">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
-            <Input placeholder="Nom, format, ou carte clé..." className="pl-8" />
-          </div>
-        </div>
-        <Select aria-label="Filter by Format">
-          <SelectTrigger>
-            <SelectValue placeholder="Format" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les formats</SelectItem>
-            <SelectItem value="standard">Standard</SelectItem>
-            <SelectItem value="modern">Modern</SelectItem>
-          </SelectContent>
-        </Select>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Nouvel Archétype
-        </Button>
-      </div>
-
-      {/* Liste des archétypes */}
-      <div className="grid gap-4">
-        {archetypes.map(archetype => (
-          <Card key={archetype.id} className="cursor-pointer hover:shadow-lg transition-shadow"
-                onClick={() => setSelectedArchetype(archetype)}>
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold text-lg">{archetype.name}</h3>
-                  <div className="flex gap-2 mt-1">
-                    <Badge>{archetype.format}</Badge>
-                    <Badge>{archetype.category}</Badge>
-                    <Badge>
-                      Confiance: {archetype.confidence}%
-                    </Badge>
-                  </div>
-                </div>
-                <div className="text-right text-sm text-gray-500">
-                  <p>{archetype.deckCount} decks</p>
-                  <p>Vu le {archetype.lastSeen}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-
-  const RuleEditor = () => (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Règles de Détection</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Type de règle</Label>
-            <Select aria-label="Select Rule Type">
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner un type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="contains_all">Contient toutes ces cartes</SelectItem>
-                <SelectItem value="contains_any">Contient certaines de ces cartes</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <Button>
-            <Save className="mr-2 h-4 w-4" />
-            Enregistrer la règle
-          </Button>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  const ValidationQueue = () => (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Decks en attente de validation</h3>
-      {pendingDecks.map(deck => (
-        <Card key={deck.id}>
-          <CardContent className="p-4">
-            <div className="space-y-4">
-              <p>Player: {deck.player}</p>
-              <div className="flex gap-2">
-                <Button>
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Valider
-                </Button>
-                <Button>
-                  <AlertCircle className="mr-2 h-4 w-4" />
-                  Nouvel archétype
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
+  const totalDecks = archetypes?.reduce((sum, archetype) => sum + archetype.deck_count, 0) || 0;
+  const activeArchetypes = archetypes?.filter(a => a.deck_count > 0).length || 0;
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6">Administration Metalyzr</h1>
-      
-      <Tabs defaultValue="archetypes" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="archetypes">Archétypes</TabsTrigger>
-          <TabsTrigger value="validation">Validation</TabsTrigger>
-          <TabsTrigger value="rules">Règles</TabsTrigger>
-        </TabsList>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center text-gray-600 hover:text-gray-900 mr-4"
+              >
+                <ArrowLeft className="h-5 w-5 mr-1" />
+                Retour au Dashboard
+              </button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Administration
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Gestion et monitoring de Metalyzr
+                </p>
+              </div>
+            </div>
+            
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+              Actualiser
+            </button>
+          </div>
+        </div>
+      </div>
 
-        <TabsContent value="archetypes">
-          <ArchetypeManager />
-        </TabsContent>
+      <div className="container mx-auto px-4 py-8">
+        {/* Statistiques rapides */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <div className="flex items-center">
+              <Database className="h-8 w-8 text-blue-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Tournois</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {tournaments?.length || 0}
+                </p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card>
+            <div className="flex items-center">
+              <TrendingUp className="h-8 w-8 text-green-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Archétypes actifs</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {activeArchetypes}
+                </p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card>
+            <div className="flex items-center">
+              <Users className="h-8 w-8 text-purple-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Total decks</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {totalDecks}
+                </p>
+              </div>
+            </div>
+          </Card>
+          
+          <Card>
+            <div className="flex items-center">
+              <Activity className="h-8 w-8 text-orange-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-gray-600">Statut</p>
+                <p className="text-lg font-semibold text-green-600">
+                  En ligne
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
 
-        <TabsContent value="validation">
-          <ValidationQueue />
-        </TabsContent>
+        {/* Actions principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <Card 
+            title="Scraping de Données"
+            subtitle="Lancer le scraping des tournois"
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Collecter les dernières données de tournois depuis MTGTop8
+              </p>
+              <button className="w-full flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                <Play className="h-4 w-4 mr-2" />
+                Lancer le Scraping
+              </button>
+            </div>
+          </Card>
+          
+          <Card 
+            title="Export des Données"
+            subtitle="Télécharger les données"
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Exporter les données de tournois et archétypes
+              </p>
+              <button className="w-full flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                <Download className="h-4 w-4 mr-2" />
+                Exporter CSV
+              </button>
+            </div>
+          </Card>
+          
+          <Card 
+            title="Configuration"
+            subtitle="Paramètres système"
+          >
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Configurer les archétypes et règles de détection
+              </p>
+              <button className="w-full flex items-center justify-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700">
+                <Settings className="h-4 w-4 mr-2" />
+                Paramètres
+              </button>
+            </div>
+          </Card>
+        </div>
 
-        <TabsContent value="rules">
-          <RuleEditor />
-        </TabsContent>
-      </Tabs>
+        {/* Tournois récents */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <Card 
+            title="Tournois Récents"
+            subtitle="Derniers tournois ajoutés"
+          >
+            {tournamentsLoading ? (
+              <LoadingSpinner className="h-32" />
+            ) : tournamentsError ? (
+              <ErrorMessage message={tournamentsError} onRetry={refetchTournaments} />
+            ) : tournaments && tournaments.length > 0 ? (
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {tournaments.slice(0, 5).map(tournament => (
+                  <div 
+                    key={tournament.id}
+                    className="flex justify-between items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                  >
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {tournament.name}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {tournament.format} • {tournament.total_players} joueurs
+                      </p>
+                    </div>
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      tournament.is_complete 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-orange-100 text-orange-800'
+                    }`}>
+                      {tournament.is_complete ? 'Terminé' : 'En cours'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Aucun tournoi trouvé</p>
+              </div>
+            )}
+          </Card>
+
+          {/* Archétypes populaires */}
+          <Card 
+            title="Archétypes Populaires"
+            subtitle="Top archétypes par nombre de decks"
+          >
+            {archetypesLoading ? (
+              <LoadingSpinner className="h-32" />
+            ) : archetypesError ? (
+              <ErrorMessage message={archetypesError} onRetry={refetchArchetypes} />
+            ) : archetypes && archetypes.length > 0 ? (
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {archetypes
+                  .filter(archetype => archetype.deck_count > 0)
+                  .sort((a, b) => b.deck_count - a.deck_count)
+                  .slice(0, 5)
+                  .map(archetype => (
+                    <div 
+                      key={archetype.id}
+                      className="flex justify-between items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
+                    >
+                      <div>
+                        <h4 className="font-medium text-gray-900">
+                          {archetype.name}
+                        </h4>
+                        <p className="text-sm text-gray-600">
+                          {archetype.category} • {archetype.format}
+                        </p>
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">
+                        {archetype.deck_count} decks
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Aucun archétype trouvé</p>
+              </div>
+            )}
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
