@@ -21,20 +21,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy the virtual environment from the builder stage
-COPY --from=builder /app/.venv ./.venv
+# Créer un utilisateur et un groupe non-root pour la sécurité
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Copy the application code
+# Copier l'environnement virtuel et le code, puis définir les permissions
+COPY --from=builder /app/.venv /app/.venv
 COPY . .
+RUN chown -R appuser:appgroup /app
 
-# Set the PATH to include the virtual environment's bin directory
-ENV PATH="/app/.venv/bin:$PATH"
-
-# Create a non-root user and change ownership
-RUN useradd --create-home appuser && \
-    chown -R appuser:appuser /app
-
-# Switch to the non-root user
+# Changer d'utilisateur pour ne pas exécuter en root
 USER appuser
 
 EXPOSE 8000
