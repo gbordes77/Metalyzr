@@ -32,10 +32,27 @@ cd frontend
 - **API**: http://localhost:8000
 - **Documentation API**: http://localhost:8000/docs
 
-### 4. Initialiser les données (optionnel)
+### 4. Vérifier les services
 
 ```bash
+# Health check basique
+curl http://localhost:8000/health
+
+# Health check détaillé avec services externes
+curl http://localhost:8000/health/detailed
+
+# Métriques Prometheus
+curl http://localhost:8000/metrics
+```
+
+### 5. Initialiser les données (optionnel)
+
+```bash
+# Charger données d'exemple
 curl http://localhost:8000/api/init-sample-data
+
+# Vérifier le cache MTGODecklistCache
+curl http://localhost:8000/api/cache/status
 ```
 
 ## Script tout-en-un
@@ -99,4 +116,77 @@ Metalyzr/
 
 **Le projet fonctionne maintenant !** 
 
-Les services backend et frontend sont opérationnels avec des données d'exemple. 
+Les services backend et frontend sont opérationnels avec des données d'exemple.
+
+## Développement
+
+### Configuration pre-commit hooks
+
+```bash
+# Installation (dans le dossier backend)
+cd backend
+pip install pre-commit
+pre-commit install
+
+# Test manual des hooks
+pre-commit run --all-files
+```
+
+### Tests automatisés
+
+```bash
+# Tests backend
+cd backend
+python -m pytest -v
+
+# Tests frontend  
+cd frontend
+npm test
+
+# Tests d'intégration
+python test_integration_complete.py
+```
+
+### Pipeline CI/CD
+
+Les tests s'exécutent automatiquement sur :
+- Chaque push vers `main`
+- Chaque pull request
+- Tests multi-versions Python (3.8-3.11)
+- Validation Docker builds
+
+### Endpoints de monitoring
+
+```bash
+# Health checks
+curl http://localhost:8000/health          # Basique
+curl http://localhost:8000/health/detailed # Complet avec services externes
+
+# Métriques Prometheus  
+curl http://localhost:8000/metrics
+
+# Status du cache
+curl http://localhost:8000/api/cache/status
+```
+
+## Production
+
+### Variables d'environnement
+
+```bash
+# .env pour production
+DATABASE_URL=postgresql://user:pass@localhost/metalyzr
+REDIS_URL=redis://localhost:6379
+MELEE_API_TOKEN=your_token_here
+LOG_LEVEL=INFO
+```
+
+### Docker deployment
+
+```bash
+# Build et démarrage
+docker-compose up -d
+
+# Health check
+curl http://localhost:8000/health/detailed
+``` 

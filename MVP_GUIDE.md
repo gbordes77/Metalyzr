@@ -34,10 +34,12 @@ python3 simple-server.py
 ### Fonctionnalités MVP
 
 #### Backend API
-- Santé du système (`/health`)
+- Santé du système (`/health`, `/health/detailed`)
+- Métriques Prometheus (`/metrics`)
 - Statistiques globales (`/api/stats`)
 - Gestion des tournois (`/api/tournaments`)
 - Gestion des archétypes (`/api/archetypes`)
+- Cache MTGODecklistCache (`/api/cache/status`, `/api/cache/sync`)
 - Données d'exemple intégrées
 
 #### Frontend Dashboard
@@ -95,15 +97,58 @@ Le MVP contient des données d'exemple :
 - **3 archétypes**: Mono-Red Aggro, Azorius Control, Simic Ramp
 - **150 decks estimés** (50 par tournoi)
 
+### Monitoring et Tests MVP
+
+#### Health Checks
+
+```bash
+# Vérifier l'état basique
+curl http://localhost:8000/health
+
+# Monitoring complet avec services externes
+curl http://localhost:8000/health/detailed
+
+# Métriques Prometheus
+curl http://localhost:8000/metrics
+```
+
+#### Tests automatisés
+
+```bash
+# Tests backend
+cd backend
+python -m pytest -v
+
+# Tests d'intégration
+python test_integration_complete.py
+
+# Pipeline CI/CD active sur GitHub
+# - Tests multi-versions Python
+# - Validation Docker builds
+# - Pre-commit hooks configurés
+```
+
+#### Configuration développement
+
+```bash
+# Pre-commit hooks pour qualité
+cd backend
+pip install pre-commit
+pre-commit install
+
+# Formats automatiquement le code avant commit
+pre-commit run --all-files
+```
+
 ### Prochaines étapes
 
-Maintenant que le MVP fonctionne, vous pouvez :
+Maintenant que le MVP fonctionne avec monitoring professionnel :
 
 1. **Ajouter de vraies données** via l'API
 2. **Connecter un vrai scraper** pour MTGTop8 ou MTGGoldfish
 3. **Ajouter une base de données** PostgreSQL
 4. **Implémenter l'authentification**
-5. **Ajouter plus de fonctionnalités**
+5. **Déployer en production** avec monitoring Grafana/Prometheus
 
 ### Résolution de problèmes
 

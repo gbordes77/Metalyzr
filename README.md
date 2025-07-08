@@ -180,17 +180,31 @@ L'interface admin permet la configuration avancée :
 L'API publique expose toutes les fonctionnalités :
 
 ```bash
-# Statistiques générales
-GET /api/stats
+# Health checks
+GET /health                    # Status basique
+GET /health/detailed          # Monitoring complet avec services externes
 
-# Liste des tournois
-GET /api/tournaments?format=Modern&limit=50
+# Monitoring
+GET /metrics                  # Métriques Prometheus
 
-# Archétypes par format
-GET /api/archetypes?format=Modern
+# Statistiques
+GET /api/stats               # Statistiques globales
 
-# Données brutes export
-GET /api/export?format=json&period=30d
+# Tournois  
+GET /api/tournaments         # Liste des tournois
+GET /api/tournaments/{id}    # Détails tournoi spécifique
+POST /api/tournaments        # Créer tournoi
+
+# Archétypes
+GET /api/archetypes          # Liste des archétypes
+POST /api/archetypes         # Créer archétype
+
+# Cache
+GET /api/cache/status        # Status du cache MTGODecklistCache
+POST /api/cache/sync         # Forcer synchronisation cache
+
+# Développement
+GET /api/init-sample-data    # Initialiser données d'exemple
 ```
 
 Documentation complète : http://localhost:8000/docs
@@ -458,6 +472,117 @@ CACHE_CONFIG = {
     }
 }
 ```
+
+## CI/CD et Qualité
+
+### Pipeline GitHub Actions
+
+Pipeline automatisé pour garantir la qualité :
+
+```yaml
+# .github/workflows/ci.yml
+name: CI Pipeline
+on: [push, pull_request]
+
+jobs:
+  test-backend:
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+    steps:
+      - name: Install dependencies
+        run: pip install -r requirements_simple.txt
+      - name: Lint with flake8
+        run: flake8 backend --count --statistics
+      - name: Test with pytest
+        run: python -m pytest -v
+      - name: Health check test
+        run: curl -f http://localhost:8000/health
+```
+
+**Features** :
+- Tests multi-versions Python (3.8 à 3.11)
+- Linting automatique avec flake8
+- Tests d'intégration frontend/backend
+- Validation Docker builds
+- Cache NPM et pip pour performance
+
+### Pre-commit Hooks
+
+Validation automatique du code avant commit :
+
+```bash
+# Installation
+pip install pre-commit
+pre-commit install
+
+# Hooks configurés
+- black (formatting Python)
+- isort (imports sorting)
+- flake8 (linting)
+- bandit (security scan)
+- eslint (frontend linting)
+```
+
+**Configuration** : `.pre-commit-config.yaml`
+
+### Health Checks Enrichis
+
+Monitoring avancé avec vérifications externes :
+
+```bash
+# Health check basique
+GET /health
+
+# Health check détaillé 
+GET /health/detailed
+```
+
+```json
+{
+  "status": "healthy",
+  "check_duration_ms": 245.8,
+  "services": {
+    "database": {"status": "healthy", "response_time_ms": 5.2},
+    "redis": {"status": "healthy", "response_time_ms": 3.1},
+    "melee_api": {"status": "healthy", "response_time_ms": 156.7},
+    "mtgtop8": {"status": "healthy", "response_time_ms": 89.4},
+    "mtgo_cache_repo": {"status": "healthy", "response_time_ms": 112.3}
+  },
+  "system_metrics": {
+    "memory": {"used_mb": 257.4, "percent": 12.8},
+    "cpu_percent": 8.5,
+    "uptime_minutes": 1440.2
+  }
+}
+```
+
+**Fonctionnalités** :
+- Vérification services externes (APIs tierces)
+- Métriques système temps réel
+- Cache intelligent (TTL 30s)
+- Fallbacks robustes
+- Alerting integration ready
+
+### Monitoring Production
+
+Métriques Prometheus exposées :
+
+```bash
+# Endpoint métriques
+GET /metrics
+
+# Métriques disponibles
+metalyzr_requests_total
+metalyzr_request_duration_seconds
+metalyzr_cache_hits_total
+metalyzr_api_errors_total
+```
+
+Intégration avec :
+- **Grafana** : Dashboards visuels
+- **Prometheus** : Collecte métriques
+- **Alertmanager** : Notifications incidents
 
 ## Déploiement Production
 

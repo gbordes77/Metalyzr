@@ -191,6 +191,103 @@ python -m pytest
 npm test
 ```
 
+## CI/CD Pipeline
+
+### GitHub Actions Architecture
+
+```mermaid
+graph TB
+    A[Push/PR] --> B[Checkout Code]
+    B --> C[Setup Python Matrix]
+    B --> D[Setup Node.js]
+    C --> E[Backend Tests]
+    D --> F[Frontend Tests] 
+    E --> G[Integration Tests]
+    F --> G
+    G --> H[Docker Build Test]
+    H --> I[Deploy Ready]
+```
+
+### Workflow configuration
+```yaml
+# .github/workflows/ci.yml
+- Matrix testing: Python 3.8, 3.9, 3.10, 3.11
+- Parallel jobs: Backend, Frontend, Integration, Docker
+- Caching: pip dependencies, npm packages
+- Linting: flake8, ESLint, TypeScript
+- Testing: pytest, Jest, health checks
+```
+
+### Pre-commit Hooks
+```bash
+# Installation
+pip install pre-commit
+pre-commit install
+
+# Hooks actifs
+- black (Python formatting)
+- isort (import sorting) 
+- flake8 (Python linting)
+- bandit (security scanning)
+- eslint (JavaScript/TypeScript)
+```
+
+## Health Checks et Monitoring
+
+### Architecture Health Checker
+
+```python
+# backend/health_enhanced.py
+class HealthChecker:
+    - check_database_connection()     # PostgreSQL status
+    - check_redis_connection()        # Redis availability  
+    - check_melee_api()              # API externe Melee.gg
+    - check_mtgtop8_availability()   # Source de scraping
+    - check_mtgo_cache_repo()        # Repository GitHub
+    - get_system_metrics()           # CPU/RAM/Disk usage
+    - comprehensive_health_check()   # Orchestration complète
+```
+
+### Endpoints de monitoring
+
+| Endpoint | Description | Cache TTL |
+|----------|-------------|-----------|
+| `/health` | Health check basique | Aucun |
+| `/health/detailed` | Diagnostics complets | 30s |
+| `/metrics` | Métriques Prometheus | Aucun |
+| `/api/cache/status` | Status cache MTGODecklistCache | 60s |
+
+### Métriques Prometheus
+
+```python
+# Métriques exposées automatiquement
+REQUEST_COUNT = Counter('metalyzr_requests_total')
+REQUEST_DURATION = Histogram('metalyzr_request_duration_seconds') 
+CACHE_HITS = Counter('metalyzr_cache_hits_total')
+API_ERRORS = Counter('metalyzr_api_errors_total')
+```
+
+### Réponse health check détaillé
+
+```json
+{
+  "status": "healthy|degraded|unhealthy",
+  "check_duration_ms": 245.8,
+  "services": {
+    "database": {"status": "healthy", "response_time_ms": 5.2},
+    "redis": {"status": "healthy", "response_time_ms": 3.1},
+    "melee_api": {"status": "healthy", "response_time_ms": 156.7},
+    "mtgtop8": {"status": "healthy", "response_time_ms": 89.4},
+    "mtgo_cache_repo": {"status": "healthy", "response_time_ms": 112.3}
+  },
+  "system_metrics": {
+    "memory": {"used_mb": 257.4, "percent": 12.8},
+    "cpu_percent": 8.5,
+    "uptime_minutes": 1440.2
+  }
+}
+```
+
 ## Monitoring
 
 ### Logs
