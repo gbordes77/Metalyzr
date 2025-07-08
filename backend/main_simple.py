@@ -20,6 +20,14 @@ from prometheus_client.multiprocess import CollectorRegistry, MultiProcessCollec
 # Import du gestionnaire de cache
 from cache_manager import mtgo_cache_manager
 
+# Import du health checker enrichi
+try:
+    from health_enhanced import health_checker
+    HEALTH_ENHANCED_AVAILABLE = True
+except ImportError:
+    HEALTH_ENHANCED_AVAILABLE = False
+    logger.warning("Health checker enrichi non disponible - utilisation basique")
+
 # Configuration du logging structuré
 logging.basicConfig(
     level=logging.INFO,
@@ -234,6 +242,33 @@ async def health_check(request: Request):
         "cache_info": cache_stats,
         "version": "2.0.0"
     }
+
+@app.get("/health/detailed", 
+         summary="Detailed Health Check",
+         description="Health check détaillé avec vérification de tous les services externes",
+         tags=["System"])
+@limiter.limit("10/minute")
+async def detailed_health_check(request: Request):
+    """Health check enrichi avec vérifications externes"""
+    if HEALTH_ENHANCED_AVAILABLE:
+        try:
+            return await health_checker.comprehensive_health_check()
+        except Exception as e:
+            logger.error(f"Erreur health check enrichi: {e}")
+            return {
+                "status": "error",
+                "timestamp": datetime.now().isoformat(),
+                "error": "Failed to perform detailed health check",
+                "fallback": True
+            }
+    else:
+        return {
+            "status": "limited",
+            "timestamp": datetime.now().isoformat(),
+            "message": "Detailed health check not available - missing dependencies",
+            "basic_status": "healthy",
+            "available_checks": ["basic", "cache"]
+        }
 
 @app.get("/metrics", 
          summary="Prometheus Metrics",
