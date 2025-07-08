@@ -1,10 +1,10 @@
-# 🎯 MVP METALYZR - Guide de démarrage
+# MVP METALYZR - Guide de démarrage
 
-## ✅ MVP Fonctionnel RÉEL (sans simulation)
+## MVP Fonctionnel (sans simulation)
 
-Le MVP Metalyzr est maintenant fonctionnel avec de **vraies données** et une **vraie API**.
+Le MVP Metalyzr est fonctionnel avec de vraies données et une vraie API.
 
-### 🚀 Démarrage rapide
+### Démarrage rapide
 
 #### 1. Démarrer le Backend (Terminal 1)
 ```bash
@@ -24,31 +24,31 @@ cd build
 python3 simple-server.py
 ```
 
-### 🔗 URLs d'accès
+### URLs d'accès
 
 - **Frontend Dashboard**: http://localhost:3000
 - **Backend API**: http://localhost:8000
 - **Health Check**: http://localhost:8000/health
 - **API Documentation**: http://localhost:8000/docs
 
-### 📊 Fonctionnalités MVP
+### Fonctionnalités MVP
 
-#### ✅ Backend API Réel
-- ✅ Santé du système (`/health`)
-- ✅ Statistiques globales (`/api/stats`)
-- ✅ Gestion des tournois (`/api/tournaments`)
-- ✅ Gestion des archétypes (`/api/archetypes`)
-- ✅ Données d'exemple intégrées
+#### Backend API
+- Santé du système (`/health`)
+- Statistiques globales (`/api/stats`)
+- Gestion des tournois (`/api/tournaments`)
+- Gestion des archétypes (`/api/archetypes`)
+- Données d'exemple intégrées
 
-#### ✅ Frontend Dashboard
-- ✅ Interface moderne avec Tailwind CSS
-- ✅ Affichage des statistiques en temps réel
-- ✅ Liste des tournois avec détails
-- ✅ Liste des archétypes avec métriques
-- ✅ Gestion d'erreurs et états de chargement
-- ✅ Actualisation manuelle des données
+#### Frontend Dashboard
+- Interface avec Tailwind CSS
+- Affichage des statistiques en temps réel
+- Liste des tournois avec détails
+- Liste des archétypes avec métriques
+- Gestion d'erreurs et états de chargement
+- Actualisation manuelle des données
 
-### 📝 Test du MVP
+### Test du MVP
 
 1. **Vérifier le backend**:
 ```bash
@@ -69,7 +69,7 @@ curl http://localhost:8000/api/archetypes
 
 4. **Accéder au dashboard**: http://localhost:3000
 
-### 🔧 Architecture MVP
+### Architecture MVP
 
 ```
 MVP Metalyzr/
@@ -87,15 +87,15 @@ MVP Metalyzr/
 │       └── static/          # Assets compilés
 ```
 
-### 🎯 Données MVP
+### Données MVP
 
-Le MVP contient des données d'exemple **réelles** (pas de simulation) :
+Le MVP contient des données d'exemple :
 
 - **3 tournois**: Standard, Modern, Legacy
 - **3 archétypes**: Mono-Red Aggro, Azorius Control, Simic Ramp
 - **150 decks estimés** (50 par tournoi)
 
-### 📈 Prochaines étapes
+### Prochaines étapes
 
 Maintenant que le MVP fonctionne, vous pouvez :
 
@@ -105,7 +105,7 @@ Maintenant que le MVP fonctionne, vous pouvez :
 4. **Implémenter l'authentification**
 5. **Ajouter plus de fonctionnalités**
 
-### 🚨 Résolution de problèmes
+### Résolution de problèmes
 
 #### Port déjà utilisé
 ```bash
@@ -130,4 +130,4 @@ npm run build
 
 ---
 
-🎉 **MVP PRÊT !** Vous avez maintenant un vrai système Metalyzr fonctionnel. 
+**MVP PRÊT !** Vous avez maintenant un système Metalyzr fonctionnel. 
