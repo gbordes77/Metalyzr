@@ -14,6 +14,7 @@ from melee_api_client import MeleeAPIClient, fetch_melee_tournaments
 from mtgtop8_scraper import MTGTop8Scraper
 from archetype_classifier import default_classifier, ArchetypeMatch
 from data_manager import DataManager
+from mtgo_cache_manager import MTGOCacheManager, mtgo_cache
 
 class UnifiedScraper:
     """
@@ -26,10 +27,14 @@ class UnifiedScraper:
         
         # Priorités des sources (1 = plus haute priorité)
         self.source_priorities = {
-            "melee.gg": 1,    # API officielle - priorité absolue
-            "mtgtop8": 2,     # Scraping - fallback fiable
-            "mtgo": 3         # Future implémentation
+            "melee.gg": 1,           # API officielle - priorité absolue
+            "mtgo_cache": 2,         # Cache MTGODecklistCache - backbone données
+            "mtgtop8": 3,            # Scraping - fallback fiable
+            "mtgo": 4                # Future implémentation
         }
+        
+        # Gestionnaire cache MTGO
+        self.mtgo_cache = mtgo_cache
         
     async def scrape_all_sources(self, 
                                 format_name: str = "Modern",
@@ -71,7 +76,19 @@ class UnifiedScraper:
             self.logger.error(error_msg)
             results["errors"].append(error_msg)
         
-        # 2. Priorité #2: Scraping MTGTop8 (fallback)
+        # 2. Priorité #2: Cache MTGODecklistCache (backbone)
+        try:
+            cache_results = await self._scrape_mtgo_cache_source(format_name, max_tournaments_per_source)
+            results["sources"]["mtgo_cache"] = cache_results
+            results["total_tournaments"] += cache_results["tournament_count"]
+            results["total_decks"] += cache_results["deck_count"]
+            
+        except Exception as e:
+            error_msg = f"MTGODecklistCache scraping failed: {str(e)}"
+            self.logger.error(error_msg)
+            results["errors"].append(error_msg)
+        
+        # 3. Priorité #3: Scraping MTGTop8 (fallback)
         try:
             mtgtop8_results = await self._scrape_mtgtop8_source(format_name, max_tournaments_per_source)
             results["sources"]["mtgtop8"] = mtgtop8_results
@@ -174,6 +191,78 @@ class UnifiedScraper:
                 
         except Exception as e:
             error_msg = f"MTGTop8 scraping error: {str(e)}"
+            source_result["errors"].append(error_msg)
+            self.logger.error(error_msg)
+        
+        return source_result
+    
+    async def _scrape_mtgo_cache_source(self, format_name: str, max_tournaments: int) -> Dict[str, Any]:
+        """Récupérer les données depuis MTGODecklistCache"""
+        self.logger.info(f"Loading MTGODecklistCache data for {format_name}")
+        
+        source_result = {
+            "source": "mtgo_cache",
+            "method": "cache",
+            "tournament_count": 0,
+            "deck_count": 0,
+            "tournaments": [],
+            "errors": []
+        }
+        
+        try:
+            # Initialiser le cache si nécessaire
+            if not self.mtgo_cache._cache_loaded:
+                await self.mtgo_cache.initialize()
+            
+            # Récupérer les tournois récents du format
+            tournaments = await self.mtgo_cache.get_tournaments(
+                format_filter=format_name,
+                limit=max_tournaments,
+                include_archive=True
+            )
+            
+            for tournament in tournaments:
+                # Convertir en format unifié Metalyzr
+                unified_tournament = {
+                    "name": tournament.name,
+                    "date": tournament.date,
+                    "format": tournament.format,
+                    "source": "mtgo_cache",
+                    "external_url": tournament.url,
+                    "decks": []
+                }
+                
+                # Classifier les decks avec engine Badaro
+                for deck_data in tournament.decks:
+                    deck = {
+                        "player": deck_data.get("Player", ""),
+                        "position": deck_data.get("Result", ""),
+                        "mainboard": deck_data.get("Mainboard", {}),
+                        "sideboard": deck_data.get("Sideboard", {}),
+                        "archetype": deck_data.get("Archetype", ""),  # Pré-classifié
+                        "source": "mtgo_cache"
+                    }
+                    unified_tournament["decks"].append(deck)
+                
+                # Re-classifier avec notre engine pour harmoniser
+                classified_tournament = await self._classify_tournament_decks(unified_tournament, format_name)
+                
+                # Sauvegarder en base
+                tournament_id = self.data_manager.save_tournament_data(classified_tournament)
+                if tournament_id:
+                    source_result["tournaments"].append({
+                        "id": tournament_id,
+                        "name": classified_tournament["name"],
+                        "deck_count": len(classified_tournament.get("decks", [])),
+                        "source_url": classified_tournament.get("external_url")
+                    })
+                    source_result["deck_count"] += len(classified_tournament.get("decks", []))
+            
+            source_result["tournament_count"] = len(tournaments)
+            self.logger.info(f"MTGOCache: {len(tournaments)} tournaments, {source_result['deck_count']} decks")
+            
+        except Exception as e:
+            error_msg = f"MTGODecklistCache error: {str(e)}"
             source_result["errors"].append(error_msg)
             self.logger.error(error_msg)
         
