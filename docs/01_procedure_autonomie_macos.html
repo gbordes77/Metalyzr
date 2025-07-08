@@ -172,7 +172,88 @@
             </div>
 
             <div class="section">
-                <h2>📋 Étape 0 - Navigation vers le projet</h2>
+                <h2>🚀 Lancement avec Script (Recommandé)</h2>
+                
+                <div class="success">
+                    <strong>⚡ Méthode la plus simple :</strong> Un seul script pour tout démarrer automatiquement !
+                </div>
+
+                <div class="step">
+                    <span class="step-number">1</span>
+                    <strong>Ouvrir le Terminal</strong>
+                    <div class="command-desc">Appuyez sur <code>Cmd + Espace</code>, tapez "Terminal" et appuyez sur Entrée</div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">2</span>
+                    <strong>Aller dans le dossier du projet</strong>
+                    <div class="command-example">cd "/Users/guillaumebordes/Documents/Metalyzr "</div>
+                </div>
+
+                <div class="step">
+                    <span class="step-number">3</span>
+                    <strong>Exécuter le script de démarrage</strong>
+                    <div class="command-example">./start-metalyzr-macos.sh</div>
+                </div>
+
+                <div class="success">
+                    <strong>✅ C'est tout !</strong><br>
+                    Le script va automatiquement :
+                    <ul>
+                        <li>Nettoyer les anciens processus</li>
+                        <li>Créer l'environnement virtuel si nécessaire</li>
+                        <li>Builder le frontend si nécessaire</li>
+                        <li>Démarrer le backend et le frontend</li>
+                        <li>Vérifier que tout fonctionne</li>
+                        <li>Afficher les URLs d'accès</li>
+                    </ul>
+                </div>
+
+                <div class="info">
+                    <strong>🔍 Que fait le script ?</strong><br>
+                    Le script <code>start-metalyzr-macos.sh</code> contient toutes les commandes optimisées pour macOS :
+                    <ul>
+                        <li>Gestion automatique des chemins avec espaces</li>
+                        <li>Utilisation de <code>python3</code> au lieu de <code>python</code></li>
+                        <li>Vérifications de santé automatiques</li>
+                        <li>Messages d'erreur détaillés</li>
+                        <li>Création des logs pour diagnostic</li>
+                    </ul>
+                </div>
+
+                <div class="command">
+                    <div class="command-title">Résultat attendu du script</div>
+                    <div class="command-example">🍎 Démarrage automatique de Metalyzr sur macOS...
+================================================
+🧹 Nettoyage des anciens processus...
+🚀 Démarrage du backend...
+⏳ Attente du démarrage backend (5 secondes)...
+✅ Backend démarré avec succès (PID: 12345)
+🌐 Démarrage du frontend...
+⏳ Attente du démarrage frontend (3 secondes)...
+✅ Frontend démarré avec succès (PID: 12346)
+
+🎉 Metalyzr démarré avec succès !
+=================================
+✅ Backend PID: 12345
+✅ Frontend PID: 12346
+
+🔗 URLs d'accès :
+   - 🌐 Frontend : http://localhost:3000
+   - 🔧 Backend  : http://localhost:8000
+   - 💚 Health   : http://localhost:8000/health
+
+🍎 Metalyzr est maintenant opérationnel sur macOS !</div>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Si le script ne fonctionne pas :</strong><br>
+                    Consultez les sections suivantes pour un démarrage manuel détaillé.
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📋 Étape 0 - Navigation vers le projet (Démarrage Manuel)</h2>
                 
                 <div class="step">
                     <span class="step-number">1</span>
@@ -197,7 +278,11 @@ ls -la</div>
             </div>
 
             <div class="section">
-                <h2>🔍 Étape 1 - Vérification des prérequis</h2>
+                <h2>🔍 Étape 1 - Vérification des prérequis (Démarrage Manuel)</h2>
+                
+                <div class="info">
+                    <strong>ℹ️ Cette section n'est nécessaire que si le script automatique ne fonctionne pas.</strong>
+                </div>
                 
                 <div class="step">
                     <span class="step-number">1</span>
@@ -222,7 +307,11 @@ npm --version</div>
             </div>
 
             <div class="section">
-                <h2>🚀 Étape 2 - Démarrage du Backend</h2>
+                <h2>🚀 Étape 2 - Démarrage du Backend (Démarrage Manuel)</h2>
+                
+                <div class="info">
+                    <strong>ℹ️ Cette section n'est nécessaire que si le script automatique ne fonctionne pas.</strong>
+                </div>
                 
                 <div class="step">
                     <span class="step-number">1</span>
@@ -253,7 +342,11 @@ npm --version</div>
             </div>
 
             <div class="section">
-                <h2>🌐 Étape 3 - Démarrage du Frontend (Nouveau Terminal)</h2>
+                <h2>🌐 Étape 3 - Démarrage du Frontend (Démarrage Manuel)</h2>
+                
+                <div class="info">
+                    <strong>ℹ️ Cette section n'est nécessaire que si le script automatique ne fonctionne pas.</strong>
+                </div>
                 
                 <div class="step">
                     <span class="step-number">1</span>
@@ -295,7 +388,11 @@ cd frontend</div>
             </div>
 
             <div class="section">
-                <h2>✅ Étape 4 - Vérification</h2>
+                <h2>✅ Étape 4 - Vérification (Démarrage Manuel)</h2>
+                
+                <div class="info">
+                    <strong>ℹ️ Cette section n'est nécessaire que si le script automatique ne fonctionne pas.</strong>
+                </div>
                 
                 <div class="step">
                     <span class="step-number">1</span>
