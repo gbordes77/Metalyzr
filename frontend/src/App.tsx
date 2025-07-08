@@ -1,12 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import PublicDashboard from './pages/public/PublicDashboard';
-import TournamentDetails from './pages/public/TournamentDetails';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import { setupMockAPI } from './api/mockHandlers';
-
-// Initialiser les mocks API pour le développement
-setupMockAPI();
+import RealDashboard from './pages/RealDashboard';
+import AdminPanel from './pages/AdminPanel';
 
 function App() {
   return (
@@ -14,9 +9,9 @@ function App() {
       <div>
         <main>
           <Routes>
-            <Route path="/" element={<PublicDashboard />} />
-            <Route path="/tournament/:id" element={<TournamentDetails />} />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/" element={<RealDashboard />} />
+            <Route path="/dashboard" element={<RealDashboard />} />
+            <Route path="/admin" element={<AdminPanel />} />
           </Routes>
         </main>
       </div>
