@@ -1,13 +1,35 @@
 import React, { useState } from 'react';
-import { api, Tournament, Archetype } from '../api/realAPI';
+import { api } from '../api/realAPI';
 import { useRealData } from '../hooks/useRealData';
+
+interface Tournament {
+  id: number;
+  name: string;
+  format: string;
+  date: string;
+  participants: number;
+  source?: string;
+  external_url?: string;
+  organizer?: string;
+}
+
+interface Archetype {
+  id: number;
+  name: string;
+  description: string;
+  winRate: number;
+  popularity: number;
+}
 
 const AdminPanel: React.FC = () => {
   const [newTournament, setNewTournament] = useState({
     name: '',
     format: 'Standard',
     participants: 0,
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    source: 'melee',
+    external_url: '',
+    organizer: 'Melee.gg'
   });
 
   const [newArchetype, setNewArchetype] = useState({
@@ -44,7 +66,10 @@ const AdminPanel: React.FC = () => {
           name: '',
           format: 'Standard',
           participants: 0,
-          date: new Date().toISOString().split('T')[0]
+          date: new Date().toISOString().split('T')[0],
+          source: 'manual',
+          external_url: '',
+          organizer: 'Manual Entry'
         });
         refetchTournaments();
         refetchStats();
@@ -201,6 +226,48 @@ const AdminPanel: React.FC = () => {
                 />
               </div>
               
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Source
+                </label>
+                <select
+                  value={newTournament.source}
+                  onChange={(e) => setNewTournament({...newTournament, source: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="melee">Melee.gg (API)</option>
+                  <option value="mtgtop8">MTGTop8 (Scraping)</option>
+                  <option value="mtgo">MTGO (Scraping)</option>
+                  <option value="manual">Manuel</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Lien externe (optionnel)
+                </label>
+                <input
+                  type="url"
+                  value={newTournament.external_url}
+                  onChange={(e) => setNewTournament({...newTournament, external_url: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://www.mtgtop8.com/event?e=12345"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Organisateur
+                </label>
+                <input
+                  type="text"
+                  value={newTournament.organizer}
+                  onChange={(e) => setNewTournament({...newTournament, organizer: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nom de l'organisateur"
+                />
+              </div>
+              
               <button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
@@ -295,15 +362,39 @@ const AdminPanel: React.FC = () => {
                       <th className="text-left py-2">Format</th>
                       <th className="text-left py-2">Participants</th>
                       <th className="text-left py-2">Date</th>
+                      <th className="text-left py-2">Source</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {tournaments.map((tournament) => (
+                    {tournaments.map((tournament: Tournament) => (
                       <tr key={tournament.id} className="border-b">
-                        <td className="py-2 font-medium">{tournament.name}</td>
+                        <td className="py-2 font-medium">
+                          {tournament.external_url ? (
+                            <a 
+                              href={tournament.external_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                              {tournament.name} 🔗
+                            </a>
+                          ) : (
+                            tournament.name
+                          )}
+                        </td>
                         <td className="py-2">{tournament.format}</td>
                         <td className="py-2">{tournament.participants}</td>
                         <td className="py-2">{tournament.date}</td>
+                        <td className="py-2">
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            tournament.source === 'melee' ? 'bg-green-100 text-green-800' :
+                            tournament.source === 'mtgtop8' ? 'bg-blue-100 text-blue-800' :
+                            tournament.source === 'mtgo' ? 'bg-purple-100 text-purple-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {tournament.organizer || tournament.source}
+                          </span>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

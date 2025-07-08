@@ -1,6 +1,25 @@
 import React from 'react';
-import { api, Stats, Tournament, Archetype } from '../api/realAPI';
+import { api, Stats } from '../api/realAPI';
 import { useRealData } from '../hooks/useRealData';
+
+interface Tournament {
+  id: number;
+  name: string;
+  format: string;
+  date: string;
+  participants: number;
+  source?: string;
+  external_url?: string;
+  organizer?: string;
+}
+
+interface Archetype {
+  id: number;
+  name: string;
+  description: string;
+  winRate: number;
+  popularity: number;
+}
 
 const RealDashboard: React.FC = () => {
   // Données réelles sans fallback
@@ -89,9 +108,27 @@ const RealDashboard: React.FC = () => {
               <div className="space-y-3">
                 {tournaments.slice(0, 5).map((tournament) => (
                   <div key={tournament.id} className="border-l-4 border-blue-500 pl-4 py-2">
-                    <h4 className="font-medium text-gray-900">{tournament.name}</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {tournament.external_url ? (
+                        <a 
+                          href={tournament.external_url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 hover:underline"
+                        >
+                          {tournament.name} 🔗
+                        </a>
+                      ) : (
+                        tournament.name
+                      )}
+                    </h4>
                     <p className="text-sm text-gray-600">
                       {tournament.format} • {tournament.participants} participants • {tournament.date}
+                      {tournament.organizer && (
+                        <span className="ml-2 text-xs text-gray-500">
+                          • {tournament.organizer}
+                        </span>
+                      )}
                     </p>
                   </div>
                 ))}

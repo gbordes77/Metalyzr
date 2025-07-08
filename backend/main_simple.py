@@ -64,7 +64,10 @@ async def create_tournament(tournament_data: dict):
         "name": tournament_data.get("name", "Nouveau Tournoi"),
         "format": tournament_data.get("format", "Standard"),
         "date": tournament_data.get("date", datetime.now().strftime("%Y-%m-%d")),
-        "participants": tournament_data.get("participants", 0)
+        "participants": tournament_data.get("participants", 0),
+        "source": tournament_data.get("source", "manual"),
+        "external_url": tournament_data.get("external_url", ""),
+        "organizer": tournament_data.get("organizer", "Manual Entry")
     }
     
     REAL_DATA["tournaments"].append(tournament)
@@ -97,22 +100,31 @@ async def init_sample_data():
     # Ajouter quelques tournois d'exemple
     sample_tournaments = [
         {
-            "name": "Tournament Series #1",
+            "name": "Weekly Standard Tournament",
             "format": "Standard",
             "date": "2025-01-05",
-            "participants": 128
+            "participants": 128,
+            "source": "melee",
+            "external_url": "https://melee.gg/Tournament/View/12345",
+            "organizer": "Melee.gg"
         },
         {
-            "name": "Modern Masters",
+            "name": "Modern Weekly Challenge", 
             "format": "Modern", 
             "date": "2025-01-06",
-            "participants": 64
+            "participants": 64,
+            "source": "melee",
+            "external_url": "https://melee.gg/Tournament/View/67890",
+            "organizer": "Melee.gg"
         },
         {
-            "name": "Legacy Challenge",
+            "name": "MTGTop8 Legacy Event",
             "format": "Legacy",
             "date": "2025-01-07", 
-            "participants": 32
+            "participants": 32,
+            "source": "mtgtop8",
+            "external_url": "https://www.mtgtop8.com/event?e=42156",
+            "organizer": "MTGTop8"
         }
     ]
     
