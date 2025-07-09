@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "name": "Burn",
+    "description": "Archétype aggro rouge",
+    "format": "Standard",
+    "colors": "Red",
+    "created_at": "2025-07-09T05:16:27.961709",
+    "updated_at": "2025-07-09T05:16:27.961719"
+  }
+]

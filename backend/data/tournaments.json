@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "name": "Test Tournament",
+    "format": "Standard",
+    "date": "2025-07-09",
+    "participants": 8,
+    "organizer": "Test Organizer",
+    "description": "Premier test du système",
+    "created_at": "2025-07-09T05:16:22.697278",
+    "updated_at": "2025-07-09T05:16:22.697297"
+  }
+]
