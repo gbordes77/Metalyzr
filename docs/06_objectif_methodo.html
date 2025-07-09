@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objectif & Méthodologie - Metalyzr</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 40px;
+        }
+        .section {
+            margin-bottom: 40px;
+            border-left: 4px solid #3498db;
+            padding-left: 20px;
+        }
+        .section h2 {
+            color: #2c3e50;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        .section h3 {
+            color: #34495e;
+            font-size: 1.3em;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        .objective {
+            background: #e8f5e8;
+            border-left: 4px solid #28a745;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 8px 8px 0;
+        }
+        .objective-title {
+            font-weight: bold;
+            color: #155724;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+        .objective-desc {
+            color: #155724;
+        }
+        .methodology {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .method-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+        .method-steps {
+            counter-reset: step-counter;
+        }
+        .method-step {
+            counter-increment: step-counter;
+            margin: 15px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            position: relative;
+        }
+        .method-step::before {
+            content: counter(step-counter);
+            position: absolute;
+            left: -15px;
+            top: 15px;
+            background: #007bff;
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .step-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .step-desc {
+            color: #666;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #155724;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #856404;
+        }
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #0c5460;
+        }
+        .vision {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .vision h3 {
+            color: white;
+            margin-bottom: 15px;
+        }
+        .principle {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .principle-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .principle-desc {
+            color: #666;
+        }
+        .metric {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .metric-title {
+            font-weight: bold;
+            color: #1976d2;
+            margin-bottom: 5px;
+        }
+        .metric-value {
+            font-size: 1.2em;
+            color: #2196f3;
+            font-weight: bold;
+        }
+        .roadmap {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .roadmap-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+        }
+        .roadmap-date {
+            background: #ffc107;
+            color: #000;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            margin-right: 15px;
+            min-width: 80px;
+            text-align: center;
+        }
+        .roadmap-desc {
+            color: #495057;
+        }
+        ul, ol {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        li {
+            margin: 8px 0;
+        }
+        code {
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Objectif & Méthodologie</h1>
+            <p>Vision, mission et approche technique de Metalyzr</p>
+        </div>
+        
+        <div class="content">
+            <div class="section">
+                <h2>🎯 Vision du Projet</h2>
+                
+                <div class="vision">
+                    <h3>🌟 Notre Mission</h3>
+                    <p>Démocratiser l'analyse du métagame Magic: The Gathering en fournissant des données précises, des insights exploitables et des outils d'analyse accessibles à tous les joueurs.</p>
+                </div>
+                
+                <div class="objective">
+                    <div class="objective-title">🎯 Objectif Principal</div>
+                    <div class="objective-desc">
+                        Créer la plateforme de référence pour l'analyse du métagame MTG, combinant données massives, intelligence artificielle et interface intuitive pour optimiser les performances compétitives.
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-title">📊 Données Exhaustives</div>
+                    <div class="principle-desc">
+                        Collecter et analyser les données de tous les tournois majeurs, MTGO et événements locaux pour offrir une vue complète du métagame.
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-title">🤖 Intelligence Artificielle</div>
+                    <div class="principle-desc">
+                        Utiliser des algorithmes avancés (Badaro Engine) pour classifier automatiquement les archétypes et détecter les tendances émergentes.
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-title">🎮 Expérience Utilisateur</div>
+                    <div class="principle-desc">
+                        Fournir une interface intuitive et des insights actionnables pour tous les niveaux de joueurs, du casual au professionnel.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔬 Méthodologie de Développement</h2>
+                
+                <div class="methodology">
+                    <div class="method-title">📋 Approche Agile</div>
+                    <div class="method-steps">
+                        <div class="method-step">
+                            <div class="step-title">Analyse des Besoins</div>
+                            <div class="step-desc">Étude approfondie des besoins des joueurs MTG et des lacunes existantes</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Conception Architecturale</div>
+                            <div class="step-desc">Design d'une architecture scalable et maintenant séparant données, logique et présentation</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Développement Itératif</div>
+                            <div class="step-desc">Développement en sprints courts avec feedback continu et ajustements</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Tests Continus</div>
+                            <div class="step-desc">Tests automatisés, validation des données et contrôle qualité permanent</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Déploiement Progressif</div>
+                            <div class="step-desc">Mise en production graduelle avec monitoring et feedback utilisateur</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="methodology">
+                    <div class="method-title">🔍 Méthodologie d'Analyse</div>
+                    <div class="method-steps">
+                        <div class="method-step">
+                            <div class="step-title">Collecte Multi-Sources</div>
+                            <div class="step-desc">Agrégation automatisée depuis Melee.gg, MTGTop8, MTGODecklistCache</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Normalisation des Données</div>
+                            <div class="step-desc">Standardisation des formats, noms de cartes et structures de données</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Classification Intelligente</div>
+                            <div class="step-desc">Utilisation du Badaro Engine pour identifier automatiquement les archétypes</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Calcul Statistique</div>
+                            <div class="step-desc">Génération de métriques avancées : popularité, taux de victoire, matchups</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Validation Croisée</div>
+                            <div class="step-desc">Vérification des résultats avec sources multiples et correction d'erreurs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Métriques de Succès</h2>
+                
+                <div class="metric">
+                    <div class="metric-title">📊 Couverture des Données</div>
+                    <div class="metric-value">95%+ des tournois majeurs</div>
+                    <div>Objectif : Capturer la quasi-totalité des événements significatifs</div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric-title">🎯 Précision Classification</div>
+                    <div class="metric-value">92%+ de précision</div>
+                    <div>Objectif : Classification automatique fiable des archétypes</div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric-title">⚡ Performance Système</div>
+                    <div class="metric-value">< 200ms temps de réponse</div>
+                    <div>Objectif : Expérience utilisateur fluide et réactive</div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric-title">👥 Adoption Utilisateur</div>
+                    <div class="metric-value">10,000+ utilisateurs actifs</div>
+                    <div>Objectif : Devenir la référence communautaire</div>
+                </div>
+                
+                <div class="metric">
+                    <div class="metric-title">📅 Actualité des Données</div>
+                    <div class="metric-value">< 24h délai mise à jour</div>
+                    <div>Objectif : Données toujours fraîches et pertinentes</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🛠️ Principes Techniques</h2>
+                
+                <div class="principle">
+                    <div class="principle-title">🎬 Séparation des Responsabilités</div>
+                    <div class="principle-desc">
+                        Architecture claire avec frontend React, backend API et services de données indépendants pour faciliter maintenance et évolution.
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-title">📦 Modularité</div>
+                    <div class="principle-desc">
+                        Composants découplés et réutilisables permettant l'ajout facile de nouvelles sources de données et fonctionnalités.
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-title">🔄 Scalabilité</div>
+                    <div class="principle-desc">
+                        Conception permettant la montée en charge horizontale et l'ajout de nouvelles fonctionnalités sans refactoring majeur.
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-title">🛡️ Fiabilité</div>
+                    <div class="principle-desc">
+                        Gestion robuste des erreurs, fallbacks automatiques et monitoring complet pour assurer une disponibilité maximale.
+                    </div>
+                </div>
+
+                <div class="principle">
+                    <div class="principle-title">🚀 Performance</div>
+                    <div class="principle-desc">
+                        Optimisations à tous les niveaux : cache intelligent, compression, indexation pour des temps de réponse optimaux.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🗺️ Roadmap Stratégique</h2>
+                
+                <div class="roadmap">
+                    <div class="roadmap-item">
+                        <div class="roadmap-date">Phase 1</div>
+                        <div class="roadmap-desc">
+                            <strong>MVP Fonctionnel</strong> - Collecte basique, classification manuelle, interface simple
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item">
+                        <div class="roadmap-date">Phase 2</div>
+                        <div class="roadmap-desc">
+                            <strong>IA & Automation</strong> - Badaro Engine, classification automatique, métriques avancées
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item">
+                        <div class="roadmap-date">Phase 3</div>
+                        <div class="roadmap-desc">
+                            <strong>Expansion Sources</strong> - Intégration MTGO, MTGTop8, sources locales
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item">
+                        <div class="roadmap-date">Phase 4</div>
+                        <div class="roadmap-desc">
+                            <strong>Fonctionnalités Avancées</strong> - Prédictions, recommandations, analyse comparative
+                        </div>
+                    </div>
+                    
+                    <div class="roadmap-item">
+                        <div class="roadmap-date">Phase 5</div>
+                        <div class="roadmap-desc">
+                            <strong>Écosystème Complet</strong> - API publique, intégrations tierces, mobile app
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Objectifs Spécifiques</h2>
+                
+                <h3>📊 Objectifs Techniques</h3>
+                <div class="info">
+                    <ul>
+                        <li><strong>Disponibilité</strong> : 99.5% uptime minimum</li>
+                        <li><strong>Scalabilité</strong> : Support de 100k+ requêtes/jour</li>
+                        <li><strong>Données</strong> : 1M+ decks analysés</li>
+                        <li><strong>Formats</strong> : Couverture complète Modern, Legacy, Standard</li>
+                        <li><strong>Temps réel</strong> : Mise à jour < 1h après tournoi</li>
+                    </ul>
+                </div>
+
+                <h3>👥 Objectifs Utilisateur</h3>
+                <div class="success">
+                    <ul>
+                        <li><strong>Adoption</strong> : 10,000+ utilisateurs actifs mensuels</li>
+                        <li><strong>Engagement</strong> : 5+ pages vues par session</li>
+                        <li><strong>Satisfaction</strong> : 4.5/5 étoiles utilisateurs</li>
+                        <li><strong>Communauté</strong> : Reconnaissance comme référence</li>
+                        <li><strong>Utilité</strong> : 80%+ trouvent les données utiles</li>
+                    </ul>
+                </div>
+
+                <h3>🚀 Objectifs Business</h3>
+                <div class="warning">
+                    <ul>
+                        <li><strong>Coûts</strong> : Infrastructure < 200€/mois</li>
+                        <li><strong>Maintenance</strong> : < 10h/semaine</li>
+                        <li><strong>Évolution</strong> : Nouvelles fonctionnalités mensuelles</li>
+                        <li><strong>Partenariats</strong> : Collaboration avec sites MTG</li>
+                        <li><strong>Durabilité</strong> : Modèle économique viable</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Méthodologie de Validation</h2>
+                
+                <div class="methodology">
+                    <div class="method-title">✅ Validation Continue</div>
+                    <div class="method-steps">
+                        <div class="method-step">
+                            <div class="step-title">Tests Utilisateur</div>
+                            <div class="step-desc">Feedback régulier de la communauté MTG et ajustements basés sur les retours</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Validation Données</div>
+                            <div class="step-desc">Comparaison croisée avec sources multiples et vérification manuelle échantillons</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Performance Monitoring</div>
+                            <div class="step-desc">Surveillance continue des métriques techniques et ajustements préventifs</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Analyse Compétitive</div>
+                            <div class="step-desc">Benchmark avec solutions existantes et identification des axes d'amélioration</div>
+                        </div>
+                        
+                        <div class="method-step">
+                            <div class="step-title">Itération Rapide</div>
+                            <div class="step-desc">Cycles courts développement-test-feedback pour adaptation continue</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎖️ Critères de Réussite</h2>
+                
+                <div class="objective">
+                    <div class="objective-title">🏆 Succès Court Terme (6 mois)</div>
+                    <div class="objective-desc">
+                        <ul>
+                            <li>MVP fonctionnel déployé et stable</li>
+                            <li>1000+ utilisateurs actifs mensuels</li>
+                            <li>Couverture complète format Modern</li>
+                            <li>Classification automatique > 85% précision</li>
+                            <li>Temps de réponse < 500ms</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="objective">
+                    <div class="objective-title">🚀 Succès Moyen Terme (12 mois)</div>
+                    <div class="objective-desc">
+                        <ul>
+                            <li>5000+ utilisateurs actifs mensuels</li>
+                            <li>Couverture tous formats majeurs</li>
+                            <li>Intégration MTGO complète</li>
+                            <li>API publique documentée</li>
+                            <li>Reconnaissance communauté MTG</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="objective">
+                    <div class="objective-title">🌟 Succès Long Terme (24 mois)</div>
+                    <div class="objective-desc">
+                        <ul>
+                            <li>10,000+ utilisateurs actifs mensuels</li>
+                            <li>Référence incontournable métagame</li>
+                            <li>Prédictions et recommandations IA</li>
+                            <li>Partenariats majeurs établis</li>
+                            <li>Modèle économique durable</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="success">
+                <strong>🎯 Vision Claire !</strong><br>
+                Cette méthodologie guide chaque décision technique et produit. L'objectif est de créer un outil indispensable pour tous les joueurs MTG compétitifs.
+            </div>
+        </div>
+    </div>
+</body>
+</html> 
