@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      # Mount the scrapers directory to be accessible by the backend service
+      - ./scrapers:/app/scrapers
+      - ./cache:/app/cache
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/metalyzr
+      # In a real scenario, use Docker secrets for credentials
+      - MELEE_EMAIL=your_email@example.com
+      - MELEE_PASSWORD=your_melee_password
+      - TOPDECK_API_KEY=your_topdeck_api_key
+    depends_on:
+      - db
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=metalyzr
+    ports:
+      - "5432:5432"
+
+volumes:
+  postgres_data: 

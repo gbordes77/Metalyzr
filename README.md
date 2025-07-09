@@ -1,344 +1,130 @@
-# 🎯 Metalyzr MVP - Intégrations Réelles
+# Metalyzr - Plateforme d'Analyse de Metagame
 
+[![Status](https://img.shields.io/badge/status-en_développement-yellow.svg)](./)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](https://python.org)
-[![React](https://img.shields.io/badge/react-18.0%2B-blue)](https://reactjs.org)
-[![FastAPI](https://img.shields.io/badge/fastapi-0.104%2B-green)](https://fastapi.tiangolo.com)
+[![Backend](https://img.shields.io/badge/backend-FastAPI-green.svg)](https://fastapi.tiangolo.com)
+[![Frontend](https://img.shields.io/badge/frontend-React-blue.svg)](https://reactjs.org)
+[![Database](https://img.shields.io/badge/database-PostgreSQL-blue.svg)](https://www.postgresql.org)
+[![Infra](https://img.shields.io/badge/infra-Docker-blue.svg)](https://www.docker.com)
 
-Plateforme d'analyse du métagame Magic: The Gathering avec **intégrations réelles** des 3 projets GitHub :
-- 🗃️ **Jiliac/MTGODecklistCache** : Cache de tournois  
-- 🕷️ **fbettega/mtg_decklist_scrapper** : Scraping de sites
-- 🎯 **Badaro/MTGOArchetypeParser** : Classification d'archétypes
+**Metalyzr** est une plateforme d'analyse du métagame de *Magic: The Gathering*, conçue pour fournir des statistiques détaillées et des visualisations à partir de données de tournois réels.
 
-**Plus de fake data - que du concret !** 🚀
-
-## ⚡ Démarrage Ultra-Rapide
-
-```bash
-# 1. Cloner et setup backend
-git clone https://github.com/gbordes77/Metalyzr.git && cd Metalyzr
-cd backend && python3 -m venv venv_simple && source venv_simple/bin/activate
-pip install fastapi uvicorn pydantic
-
-# 2. Installer les intégrations réelles
-cd .. && ./install-integrations.sh
-
-# 3. Lancer le backend avec intégrations
-cd backend && python3 main_simple.py &
-
-# 4. Setup et lancer frontend  
-cd ../frontend && npm install && npm run build
-cd build && node serve-spa.js
-
-# ✅ Accès : http://localhost:3000 (Frontend) | http://localhost:8000 (API)
-```
-
-## 🚀 Nouvelles Fonctionnalités (Intégrations Réelles)
-
-### ✅ Ce qui fonctionne VRAIMENT
-
-| Fonctionnalité | Status | Description |
-|----------------|--------|-------------|
-| 🗃️ **Cache Jiliac** | ✅ ACTIF | Tournois depuis MTGODecklistCache GitHub |
-| 🕷️ **Multi-Scraper** | ✅ ACTIF | 7 sites MTG : MTGGoldfish, MTGTop8, etc. |
-| 🎯 **Engine Badaro** | ✅ ACTIF | Classification d'archétypes (C# → Python) |
-| 📊 **Analyse Méta** | ✅ ACTIF | Statistiques temps réel des archétypes |
-| 🔍 **Recherche** | ✅ ACTIF | Tournois par archétype |
-| 💾 **CRUD Manual** | ✅ ACTIF | Interface manuelle (preserved) |
-
-### 🌐 Nouvelles APIs Disponibles
-
-```bash
-# Status des intégrations
-GET /api/integrations/status
-
-# Tournois récents avec archétypes automatiques  
-GET /api/integrations/tournaments/recent?format_name=Modern&days=7
-
-# Scraping de deck depuis URL
-POST /api/integrations/scrape/deck
-{"url": "https://mtggoldfish.com/deck/...", "format": "Modern"}
-
-# Analyse complète du méta
-POST /api/integrations/meta/analysis
-{"format": "Modern", "days": 7}
-
-# Recherche par archétype
-GET /api/integrations/tournaments/search?archetype=Burn
-
-# Sites supportés pour scraping
-GET /api/integrations/supported-sites
-```
-
-## 🏗️ Architecture (Mise à Jour)
-
-```mermaid
-graph TB
-    subgraph "Frontend React"
-        A[Dashboard] --> B[Admin Panel]
-        B --> C[API Calls]
-    end
-    
-    subgraph "Backend FastAPI"
-        D[main_simple.py] --> E[IntegrationService]
-        E --> F[JiliacCache]
-        E --> G[MTGScraper] 
-        E --> H[BadaroEngine]
-    end
-    
-    subgraph "Intégrations Réelles"
-        F --> I[GitHub MTGODecklistCache]
-        G --> J[MTGGoldfish + 6 sites]
-        H --> K[Archetype Classification]
-    end
-    
-    subgraph "Sources Externes"
-        L[Jiliac/MTGODecklistCache]
-        M[fbettega/mtg_decklist_scrapper]  
-        N[Badaro/MTGOArchetypeParser]
-    end
-    
-    C --> D
-    I --> L
-    J --> M
-    K --> N
-```
-
-### 📁 Structure des Intégrations
-
-```
-backend/
-├── integrations/                    # ✨ NOUVEAU
-│   ├── jiliac_cache.py             # Cache tournois GitHub
-│   ├── mtg_scraper.py              # Scraper multi-sites
-│   ├── badaro_archetype_engine.py  # Moteur classification
-│   └── integration_service.py      # Service principal
-├── cache/integrations/              # Cache local
-│   ├── jiliac/                     # Données tournois
-│   ├── scraper/                    # Données scraping
-│   └── archetype_formats/          # Règles archétypes
-├── main_simple.py                  # API principale (updated)
-└── requirements_integrations.txt   # Dépendances intégrations
-```
-
-## 🛠️ Installation Complète
-
-### Option A : Installation Automatique (Recommandé)
-
-```bash
-# Installation complète avec un seul script
-./install-integrations.sh
-
-# Test des intégrations
-./test-integrations.sh
-
-# Lancement
-cd backend && python3 main_simple.py
-```
-
-### Option B : Installation Manuelle
-
-```bash
-# 1. Backend basique
-cd backend
-python3 -m venv venv_simple
-source venv_simple/bin/activate
-pip install fastapi uvicorn pydantic
-
-# 2. Dépendances intégrations
-pip install -r requirements_integrations.txt
-
-# 3. Frontend
-cd ../frontend
-npm install
-npm run build
-
-# 4. Lancement backend
-cd ../backend
-python3 main_simple.py &
-
-# 5. Lancement frontend
-cd ../frontend/build
-node serve-spa.js
-```
-
-## 📊 Exemples d'Utilisation
-
-### 1. Obtenir le méta Modern récent
-
-```bash
-curl "http://localhost:8000/api/integrations/tournaments/recent?format_name=Modern&days=7"
-```
-
-**Réponse** :
-```json
-{
-  "tournaments": [
-    {
-      "tournament": {"name": "Modern Tournament", "format": "Modern"},
-      "decks": [
-        {
-          "player": "Player1",
-          "archetype_classification": {
-            "archetype": "R Burn",
-            "confidence": 1.0
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-### 2. Scraper un deck MTGGoldfish
-
-```bash
-curl -X POST http://localhost:8000/api/integrations/scrape/deck \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://www.mtggoldfish.com/archetype/modern-burn"}'
-```
-
-### 3. Analyse méta complète
-
-```bash
-curl -X POST http://localhost:8000/api/integrations/meta/analysis \
-  -H "Content-Type: application/json" \
-  -d '{"format": "Modern", "days": 7}'
-```
-
-## 🎯 Fonctionnalités par Intégration
-
-### 🗃️ Jiliac Cache (MTGODecklistCache)
-- **Sources** : Melee, MTGO, Topdeck
-- **Fonctions** : Tournois récents, recherche par date
-- **Cache local** : Évite les appels GitHub répétés
-- **API** : `/api/integrations/tournaments/recent`
-
-### 🕷️ MTG Scraper (fbettega inspired)
-- **Sites supportés** : MTGGoldfish, MTGTop8, EDHRec, AetherHub, Archidekt, Moxfield, TappedOut
-- **Fonctions** : Extraction mainboard/sideboard, métadonnées
-- **Cache local** : Scraping intelligent avec cache
-- **API** : `/api/integrations/scrape/deck`
-
-### 🎯 Badaro Engine (MTGOArchetypeParser)
-- **Classification** : 12 types de conditions
-- **Formats** : Modern, Standard, Legacy (extensible)
-- **Variantes** : Archétypes avec sous-variantes
-- **Fallbacks** : Classification générique si aucune correspondance
-- **API** : Classification automatique dans tous les endpoints
-
-## 🧪 Tests et Validation
-
-```bash
-# Test complet des intégrations
-./test-integrations.sh
-
-# Tests individuels
-curl http://localhost:8000/api/integrations/status
-curl http://localhost:8000/api/integrations/supported-sites
-curl http://localhost:8000/health
-```
-
-## 📚 Documentation
-
-- 📖 **[Guide Intégrations](INTEGRATIONS_REELLES.md)** : Documentation technique complète
-- 🚀 **[Guide Démarrage](QUICK_START.md)** : Setup rapide
-- 👨‍💼 **[Guide Admin](docs/ADMIN_GUIDE.md)** : Administration
-- 🧑‍💻 **[Guide Développeur](CONTRIBUTING.md)** : Contribution
-
-## 🔧 Développement
-
-### Ajouter un nouveau site de scraping
-
-```python
-# Dans mtg_scraper.py
-def _scrape_nouveau_site(self, url: str) -> Optional[Dict]:
-    soup = self._fetch_page(url)
-    # Votre logique de scraping
-    return deck_data
-
-# Enregistrer dans supported_sites
-self.supported_sites['nouveau-site.com'] = self._scrape_nouveau_site
-```
-
-### Ajouter un nouveau format
-
-```bash
-mkdir -p cache/integrations/archetype_formats/NOUVEAU_FORMAT/{archetypes,fallbacks}
-```
-
-## 📈 Performance
-
-- ⚡ **Cache local** : Évite les appels externes répétés
-- 🔄 **Scraping intelligent** : Headers optimisés, gestion erreurs
-- 🎯 **Classification rapide** : Moteur de règles efficace
-- 📊 **API REST** : Réponses structurées et paginées
-
-## 🛣️ Roadmap
-
-### ✅ Terminé (v2.0)
-- Intégration Jiliac Cache
-- Scraper multi-sites  
-- Moteur Badaro porté en Python
-- APIs d'intégration complètes
-- Tests automatisés
-
-### 🔄 En cours
-- Interface graphique pour les intégrations
-- Dashboard temps réel
-- Métriques de performance
-
-### 🔮 Futur
-- Cache Redis distribué
-- WebSockets temps réel
-- Machine Learning pour classification
-- API rate limiting
-
-## 🐛 Problèmes Connus
-
-1. **BeautifulSoup manquant** : `pip install -r requirements_integrations.txt`
-2. **Port 8000 occupé** : Changer le port dans `main_simple.py`
-3. **Scraping bloqué** : Certains sites peuvent avoir des protections anti-bot
-
-## 💻 Développement et Contribution
-
-```bash
-# Setup dev
-git clone https://github.com/gbordes77/Metalyzr.git
-cd Metalyzr
-./install-integrations.sh
-
-# Tests
-./test-integrations.sh
-cd backend && python3 main_simple.py
-
-# Contributions welcome !
-# Voir CONTRIBUTING.md pour les guidelines
-```
-
-## 📞 Support
-
-- 🐛 **Issues** : [GitHub Issues](https://github.com/gbordes77/Metalyzr/issues)
-- 📚 **Docs** : http://localhost:8000/docs (API Swagger)
-- 🧪 **Tests** : `./test-integrations.sh`
-
-## 📄 License
-
-MIT License - voir [LICENSE](LICENSE) pour les détails.
+Le projet a été entièrement refactorisé pour s'appuyer sur une architecture moderne, robuste et scalable.
 
 ---
 
-## ⭐ Highlights
+## 🚀 Démarrage Rapide (Méthode Docker)
 
-**Metalyzr MVP v2.0** intègre pour de vrai les 3 projets GitHub les plus populaires de l'écosystème MTG data :
+Le moyen le plus simple et le plus fiable de lancer le projet est d'utiliser Docker et Docker Compose.
 
-1. 🗃️ **Cache de Jiliac** → Données tournois structurées  
-2. 🕷️ **Scraper de fbettega** → Extraction multi-sites
-3. 🎯 **Engine de Badaro** → Classification intelligente
+### Prérequis
 
-**Résultat** : Une plateforme complète d'analyse méta **sans fake data** ! 🚀
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
+### 1. Configuration des Identifiants du Scraper
+
+Le pipeline de données repose sur un scraper externe pour collecter les informations des tournois. Pour que celui-ci fonctionne, vous devez fournir des identifiants pour certains sites.
+
+Ouvrez le fichier `docker-compose.yml` et remplacez les valeurs des variables d'environnement suivantes :
+
+```yaml
+# In docker-compose.yml, under services.backend.environment
+services:
+  backend:
+    # ...
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/metalyzr
+      # ↓↓↓ METTEZ À JOUR CES VALEURS ↓↓↓
+      - MELEE_EMAIL=your_email@example.com
+      - MELEE_PASSWORD=your_melee_password
+      - TOPDECK_API_KEY=your_topdeck_api_key
+```
+
+### 2. Lancement des Services
+
+Une fois les identifiants configurés, lancez l'ensemble des services avec une seule commande :
 
 ```bash
-# One-liner pour tout installer et tester
-./install-integrations.sh && ./test-integrations.sh
+docker-compose up --build
 ```
+
+Cette commande va :
+1.  Construire l'image Docker pour le backend FastAPI.
+2.  Lancer un conteneur pour le backend.
+3.  Lancer un conteneur pour la base de données PostgreSQL.
+4.  Créer un volume pour la persistance des données de la base de données.
+
+### 3. Initialisation de la Base de Données
+
+Le backend est configuré pour initialiser automatiquement le schéma de la base de données au premier démarrage. Vous devriez voir les logs correspondants dans la sortie de `docker-compose`.
+
+### 4. Lancement du Pipeline de Données
+
+Une fois les services démarrés, vous devez déclencher manuellement la première exécution du pipeline ETL pour peupler la base de données.
+
+Ouvrez un nouveau terminal et exécutez la commande suivante :
+
+```bash
+curl -X POST http://localhost:8000/api/metagame/update
+```
+
+**Réponse attendue :**
+```json
+{"message": "Metagame update process started in the background."}
+```
+Ce processus peut prendre plusieurs minutes, en fonction de la quantité de données à scraper.
+
+---
+
+## 🏗️ Architecture
+
+Le projet est maintenant architecturé autour de services conteneurisés :
+
+```mermaid
+graph TD
+    subgraph "Infrastructure Docker"
+        A[Docker Compose] --> B[Backend Container (FastAPI)];
+        A --> C[Database Container (PostgreSQL)];
+        B --> C;
+    end
+
+    subgraph "Pipeline de Données (ETL)"
+        D[Scraper Externe] -- Données brutes --> E[MetagameService];
+        E -- Données classifiées --> C;
+    end
+    
+    subgraph "API & Frontend"
+        F[Utilisateur/Admin] --> G[Frontend React];
+        G -- Requêtes API --> B;
+    end
+
+    B --> D;
+```
+
+-   **Backend** : Une application **FastAPI** qui sert une API REST pour piloter le pipeline de données et exposer les analyses.
+-   **Base de Données** : Une instance **PostgreSQL** qui stocke toutes les données de manière structurée (tournois, decks, cartes, etc.).
+-   **Scraper** : Le projet `fbettega/mtg_decklist_scrapper` est intégré en tant que sous-module Git et est orchestré par le backend pour l'acquisition de données.
+-   **Frontend** : Une application **React** (non incluse dans le Docker Compose pour l'instant) qui consommera l'API pour afficher les visualisations et fournir les outils d'administration.
+
+---
+
+## 🛠️ Endpoints de l'API Principale
+
+L'API est accessible sur `http://localhost:8000`.
+
+-   `POST /api/metagame/update`
+    -   Déclenche une mise à jour en arrière-plan des données du métagame.
+-   `GET /api/metagame/status`
+    -   Retourne le statut du `MetagameService` et de ses composants (scraper, base de données).
+-   `GET /api/metagame/analysis/metagame_share/{format_name}`
+    -   Calcule et retourne la répartition en pourcentage des archétypes pour un format donné.
+    -   *Exemple :* `/api/metagame/analysis/metagame_share/Modern?days=14`
+
+---
+
+## 📚 Documentation Complémentaire
+
+-   **[Architecture Technique](./ARCHITECTURE.md)** : Détails sur la structure du code, le schéma de la base de données et le flux de données.
+
+(Les autres documents de l'ancien système ont été archivés pour éviter toute confusion).
