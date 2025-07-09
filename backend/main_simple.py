@@ -140,7 +140,7 @@ async def add_monitoring_middleware(request: Request, call_next):
         )
         raise
 
-# Données de base réelles (sans "mock") + cache intégré
+# Données réelles uniquement - vides au démarrage
 REAL_DATA = {
     "stats": {
         "tournaments": 0,
@@ -205,24 +205,48 @@ async def load_cache_data():
             total_decks = sum(len(t.get("decks", [])) for t in all_tournaments)
             REAL_DATA["stats"]["decks"] = total_decks
             
-            # Extraire archétypes uniques
-            archetypes = set()
+            # Extraire archétypes uniques SEULEMENT s'il y a de vrais decks
+            archetype_stats = {}
+            total_decks_analyzed = 0
+            
             for tournament in all_tournaments:
                 for deck in tournament.get("decks", []):
-                    archetype = deck.get("archetype", "Unknown")
-                    if archetype and archetype != "Unknown":
-                        archetypes.add(archetype)
+                    archetype = deck.get("archetype", "")
+                    if archetype and archetype != "Unknown" and archetype.strip():
+                        total_decks_analyzed += 1
+                        if archetype not in archetype_stats:
+                            archetype_stats[archetype] = {
+                                "count": 0,
+                                "wins": 0,
+                                "total_games": 0
+                            }
+                        archetype_stats[archetype]["count"] += 1
+                        
+                        # Calculer vraies stats si disponibles
+                        if "wins" in deck:
+                            archetype_stats[archetype]["wins"] += deck.get("wins", 0)
+                        if "total_games" in deck:
+                            archetype_stats[archetype]["total_games"] += deck.get("total_games", 0)
             
-            # Créer liste d'archétypes avec stats
+            # Créer liste d'archétypes avec vraies statistiques SEULEMENT
             archetype_list = []
-            for archetype in archetypes:
-                archetype_list.append({
+            for archetype, stats in archetype_stats.items():
+                popularity = (stats["count"] / total_decks_analyzed * 100) if total_decks_analyzed > 0 else 0
+                win_rate = (stats["wins"] / stats["total_games"] * 100) if stats["total_games"] > 0 else None
+                
+                archetype_data = {
                     "id": len(archetype_list) + 1,
                     "name": archetype,
-                    "description": f"Archétype {archetype} détecté automatiquement",
-                    "winRate": 50.0 + (hash(archetype) % 30),  # Simulation
-                    "popularity": 5.0 + (hash(archetype) % 15)  # Simulation
-                })
+                    "description": f"Archétype détecté dans {stats['count']} deck(s)",
+                    "popularity": round(popularity, 2),
+                    "deck_count": stats["count"]
+                }
+                
+                # Ajouter winRate SEULEMENT si on a de vraies données
+                if win_rate is not None:
+                    archetype_data["winRate"] = round(win_rate, 2)
+                
+                archetype_list.append(archetype_data)
             
             REAL_DATA["archetypes"] = archetype_list
             REAL_DATA["stats"]["archetypes"] = len(archetype_list)
@@ -406,75 +430,7 @@ async def create_archetype(archetype_data: dict, request: Request):
     logger.info(f"Nouvel archétype créé: {archetype['name']}")
     return archetype
 
-@app.get("/api/init-sample-data", 
-         summary="Initialize Sample Data",
-         description="Initialiser avec des données d'exemple + recharger cache",
-         tags=["Development"])
-@limiter.limit("5/minute")
-async def init_sample_data(request: Request):
-    """Initialiser avec des données d'exemple + recharger cache"""
-    
-    # Recharger le cache
-    await load_cache_data()
-    
-    # Ajouter quelques tournois d'exemple pour compléter
-    sample_tournaments = [
-        {
-            "name": "Weekly Standard Tournament",
-            "format": "Standard",
-            "date": "2025-01-05",
-            "participants": 128,
-            "source": "melee",
-            "external_url": "https://melee.gg/Tournament/View/12345",
-            "organizer": "Melee.gg",
-            "decks": []
-        },
-        {
-            "name": "Modern Weekly Challenge", 
-            "format": "Modern", 
-            "date": "2025-01-06",
-            "participants": 64,
-            "source": "melee",
-            "external_url": "https://melee.gg/Tournament/View/67890",
-            "organizer": "Melee.gg",
-            "decks": []
-        }
-    ]
-    
-    for tournament_data in sample_tournaments:
-        await create_tournament(tournament_data, request)
-    
-    # Ajouter quelques archétypes d'exemple si peu d'archétypes du cache
-    if len(REAL_DATA["archetypes"]) < 5:
-        sample_archetypes = [
-            {
-                "name": "Mono-Red Aggro",
-                "description": "Deck agressif rouge rapide",
-                "winRate": 65.2,
-                "popularity": 18.5
-            },
-            {
-                "name": "Azorius Control",
-                "description": "Deck de contrôle blanc-bleu",
-                "winRate": 58.7,
-                "popularity": 12.3
-            },
-            {
-                "name": "Simic Ramp",
-                "description": "Deck rampe vert-bleu",
-                "winRate": 52.1,
-                "popularity": 8.9
-            }
-        ]
-        
-        for archetype_data in sample_archetypes:
-            await create_archetype(archetype_data, request)
-    
-    logger.info("Données d'exemple initialisées")
-    return {
-        "message": "Données d'exemple initialisées + cache rechargé",
-        "stats": REAL_DATA["stats"]
-    }
+
 
 @app.get("/api/cache/sync", 
          summary="Sync Cache",
