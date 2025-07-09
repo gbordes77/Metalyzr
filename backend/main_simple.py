@@ -15,7 +15,6 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from prometheus_client import Counter, Histogram, generate_latest
-from prometheus_client.multiprocess import CollectorRegistry, MultiProcessCollector
 
 # Import du gestionnaire de cache
 from cache_manager import mtgo_cache_manager
@@ -42,11 +41,31 @@ logger = logging.getLogger("metalyzr.api")
 # Rate limiting configuration
 limiter = Limiter(key_func=get_remote_address)
 
-# Monitoring métriques
-REQUEST_COUNT = Counter('metalyzr_requests_total', 'Total requests', ['method', 'endpoint', 'status'])
-REQUEST_DURATION = Histogram('metalyzr_request_duration_seconds', 'Request duration')
-CACHE_HITS = Counter('metalyzr_cache_hits_total', 'Cache hits', ['type'])
-API_ERRORS = Counter('metalyzr_api_errors_total', 'API errors', ['error_type'])
+# Monitoring métriques avec gestion des duplicates
+try:
+    REQUEST_COUNT = Counter('metalyzr_requests_total', 'Total requests', ['method', 'endpoint', 'status'])
+    REQUEST_DURATION = Histogram('metalyzr_request_duration_seconds', 'Request duration')
+    CACHE_HITS = Counter('metalyzr_cache_hits_total', 'Cache hits', ['type'])
+    API_ERRORS = Counter('metalyzr_api_errors_total', 'API errors', ['error_type'])
+except ValueError:
+    # Si les métriques existent déjà, les récupérer depuis le registre
+    from prometheus_client import CollectorRegistry, REGISTRY
+    from prometheus_client.registry import RestrictedRegistry
+    
+    # Nettoyer le registre pour éviter les conflits
+    collectors = list(REGISTRY._collector_to_names.keys())
+    for collector in collectors:
+        if hasattr(collector, '_name') and 'metalyzr' in str(collector._name):
+            try:
+                REGISTRY.unregister(collector)
+            except KeyError:
+                pass
+    
+    # Recréer les métriques
+    REQUEST_COUNT = Counter('metalyzr_requests_total', 'Total requests', ['method', 'endpoint', 'status'])
+    REQUEST_DURATION = Histogram('metalyzr_request_duration_seconds', 'Request duration')
+    CACHE_HITS = Counter('metalyzr_cache_hits_total', 'Cache hits', ['type'])
+    API_ERRORS = Counter('metalyzr_api_errors_total', 'API errors', ['error_type'])
 
 app = FastAPI(
     title="Metalyzr API", 
