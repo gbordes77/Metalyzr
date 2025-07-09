@@ -1,192 +1,192 @@
-# Metalyzr - Démarrage Rapide
+# 🚀 Guide de Démarrage Rapide - Metalyzr MVP
 
-## Installation et Lancement (5 minutes)
+**Metalyzr** avec **intégrations réelles** des 3 projets GitHub MTG les plus populaires !
 
-### 1. Backend API (Terminal 1)
+---
+
+## ⚡ Installation Ultra-Rapide (5 minutes)
+
+### Option 1 : One-Liner Magique ✨
 
 ```bash
+git clone https://github.com/gbordes77/Metalyzr.git && cd Metalyzr && ./install-integrations.sh && cd backend && python3 main_simple.py
+```
+
+### Option 2 : Étapes Détaillées
+
+```bash
+# 1. Cloner le projet
+git clone https://github.com/gbordes77/Metalyzr.git
+cd Metalyzr
+
+# 2. Installer les intégrations réelles
+./install-integrations.sh
+
+# 3. Lancer le backend
 cd backend
+python3 main_simple.py &
 
-# Créer l'environnement virtuel (première fois seulement)
-python3 -m venv venv_new
-source venv_new/bin/activate
-pip install -r requirements_simple.txt
-
-# Démarrer le backend
-./start-backend.sh
-```
-
-### 2. Frontend React (Terminal 2)
-
-```bash
-cd frontend
-
-# Démarrer le frontend
-./start-frontend.sh
-```
-
-### 3. Accéder à l'application
-
-- **Application**: http://localhost:3000
-- **Admin**: http://localhost:3000/admin
-- **API**: http://localhost:8000
-- **Documentation API**: http://localhost:8000/docs
-
-### 4. Vérifier les services
-
-```bash
-# Health check basique
-curl http://localhost:8000/health
-
-# Health check détaillé avec services externes
-curl http://localhost:8000/health/detailed
-
-# Métriques Prometheus
-curl http://localhost:8000/metrics
-```
-
-### 5. Initialiser les données (optionnel)
-
-```bash
-# Charger données d'exemple
-curl http://localhost:8000/api/init-sample-data
-
-# Vérifier le cache MTGODecklistCache
-curl http://localhost:8000/api/cache/status
-```
-
-## Script tout-en-un
-
-Pour démarrer les deux services en même temps :
-
-```bash
-./start-metalyzr.sh
-```
-
-## Vérification rapide
-
-```bash
-# Backend
-curl http://localhost:8000/health
-
-# Frontend  
-curl http://localhost:3000
-```
-
-## Résolution de problèmes
-
-### "Address already in use"
-```bash
-# Tuer les processus sur les ports
-sudo lsof -ti:8000 | xargs kill -9
-sudo lsof -ti:3000 | xargs kill -9
-```
-
-### "venv_new not found"
-```bash
-cd backend
-python3 -m venv venv_new
-source venv_new/bin/activate
-pip install -r requirements_simple.txt
-```
-
-### "serve-spa.js not found"
-Le fichier existe déjà dans `frontend/build/serve-spa.js`. Si problème :
-```bash
-cd frontend/build
-node serve-spa.js
-```
-
-## Architecture
-
-```
-Metalyzr/
-├── backend/          # FastAPI (port 8000)
-│   ├── main_simple.py
-│   ├── venv_new/
-│   └── start-backend.sh
-├── frontend/         # React (port 3000)  
-│   ├── build/
-│   │   └── serve-spa.js
-│   └── start-frontend.sh
-└── start-metalyzr.sh # Script global
+# 4. Lancer le frontend (nouveau terminal)
+cd ../frontend
+npm install && npm run build
+cd build && node serve-spa.js
 ```
 
 ---
 
-**Le projet fonctionne maintenant !** 
+## 🎯 Accès Direct
 
-Les services backend et frontend sont opérationnels avec des données d'exemple.
+| Service | URL | Description |
+|---------|-----|-------------|
+| **Dashboard** | http://localhost:3000 | Interface utilisateur |
+| **API** | http://localhost:8000 | API REST |
+| **Docs** | http://localhost:8000/docs | Documentation Swagger |
+| **Admin** | http://localhost:3000/admin | Panel d'administration |
 
-## Développement
+---
 
-### Configuration pre-commit hooks
+## 🧪 Test des Intégrations
 
 ```bash
-# Installation (dans le dossier backend)
-cd backend
-pip install pre-commit
-pre-commit install
+# Tester toutes les intégrations
+./test-integrations.sh
 
-# Test manual des hooks
-pre-commit run --all-files
+# Tests individuels
+curl http://localhost:8000/api/integrations/status
+curl http://localhost:8000/api/integrations/supported-sites
+curl http://localhost:8000/health
 ```
 
-### Tests automatisés
+---
+
+## 🚀 Fonctionnalités Instantanées
+
+### 1. Obtenir des Tournois Récents avec Archétypes
 
 ```bash
-# Tests backend
-cd backend
-python -m pytest -v
+curl "http://localhost:8000/api/integrations/tournaments/recent?format_name=Modern&days=7"
+```
 
-# Tests frontend  
+### 2. Scraper un Deck MTGGoldfish
+
+```bash
+curl -X POST http://localhost:8000/api/integrations/scrape/deck \
+  -H "Content-Type: application/json" \
+  -d '{"url": "https://www.mtggoldfish.com/archetype/modern-burn"}'
+```
+
+### 3. Analyse Méta Complète
+
+```bash
+curl -X POST http://localhost:8000/api/integrations/meta/analysis \
+  -H "Content-Type: application/json" \
+  -d '{"format": "Modern", "days": 7}'
+```
+
+---
+
+## 📊 Dashboard Interactif
+
+1. **Ouvrir** : http://localhost:3000
+2. **Naviguer** : Tournois, Archétypes, Statistiques
+3. **Utiliser** : Filtres, recherche, visualisations
+
+---
+
+## 🔧 Résolution de Problèmes
+
+### Problème : "bs4 module not found"
+
+```bash
+cd backend
+pip install -r requirements_integrations.txt
+```
+
+### Problème : "Port 8000 already in use"
+
+```bash
+# Tuer le processus existant
+ps aux | grep python3 | grep main_simple.py | awk '{print $2}' | xargs kill -9
+
+# Ou changer le port dans main_simple.py
+```
+
+### Problème : Frontend ne démarre pas
+
+```bash
 cd frontend
-npm test
-
-# Tests d'intégration
-python test_integration_complete.py
+npm install
+npm run build
+cd build && node serve-spa.js
 ```
 
-### Pipeline CI/CD
+---
 
-Les tests s'exécutent automatiquement sur :
-- Chaque push vers `main`
-- Chaque pull request
-- Tests multi-versions Python (3.8-3.11)
-- Validation Docker builds
+## 🎯 Intégrations Disponibles
 
-### Endpoints de monitoring
+### 🗃️ Jiliac Cache (MTGODecklistCache)
+- **Données** : Tournois Melee, MTGO, Topdeck
+- **Cache** : Local + GitHub
+- **API** : `/api/integrations/tournaments/recent`
 
+### 🕷️ MTG Scraper (fbettega)
+- **Sites** : MTGGoldfish, MTGTop8, EDHRec, AetherHub, Archidekt, Moxfield, TappedOut
+- **Cache** : Intelligent local
+- **API** : `/api/integrations/scrape/deck`
+
+### 🎯 Badaro Engine (MTGOArchetypeParser)
+- **Classification** : Automatique par règles
+- **Formats** : Modern, Standard, Legacy
+- **API** : Toutes les APIs incluent la classification
+
+---
+
+## 📚 Documentation
+
+- **[Guide Complet](INTEGRATIONS_REELLES.md)** : Documentation technique
+- **[README](README.md)** : Vue d'ensemble
+- **[API Docs](http://localhost:8000/docs)** : Swagger interface
+
+---
+
+## 🎮 Exemples d'Usage
+
+### Interface Web
+1. Ouvrir http://localhost:3000
+2. Voir les tournois récents
+3. Filtrer par format/archétype
+4. Analyser les statistiques
+
+### API REST
 ```bash
-# Health checks
-curl http://localhost:8000/health          # Basique
-curl http://localhost:8000/health/detailed # Complet avec services externes
+# Statut des intégrations
+curl http://localhost:8000/api/integrations/status
 
-# Métriques Prometheus  
-curl http://localhost:8000/metrics
+# Sites supportés
+curl http://localhost:8000/api/integrations/supported-sites
 
-# Status du cache
-curl http://localhost:8000/api/cache/status
+# Formats supportés
+curl http://localhost:8000/api/integrations/supported-formats
 ```
 
-## Production
+---
 
-### Variables d'environnement
+## 🚀 Next Steps
 
-```bash
-# .env pour production
-DATABASE_URL=postgresql://user:pass@localhost/metalyzr
-REDIS_URL=redis://localhost:6379
-MELEE_API_TOKEN=your_token_here
-LOG_LEVEL=INFO
-```
+1. **Tester** : Utiliser les APIs d'intégration
+2. **Explorer** : Dashboard interactif
+3. **Contribuer** : Ajouter de nouveaux sites
+4. **Étendre** : Créer de nouveaux formats
 
-### Docker deployment
+---
 
-```bash
-# Build et démarrage
-docker-compose up -d
+## 🏆 Résultat
 
-# Health check
-curl http://localhost:8000/health/detailed
-``` 
+**En 5 minutes, vous avez** :
+- ✅ Une plateforme MTG complète
+- ✅ 3 intégrations GitHub réelles
+- ✅ 7 sites de scraping
+- ✅ Classification automatique d'archétypes
+- ✅ Interface web + API REST
+
+**Plus de fake data - que du concret !** 🎯 

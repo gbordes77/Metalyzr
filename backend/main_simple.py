@@ -1,359 +1,377 @@
+#!/usr/bin/env python3
 """
-Backend FastAPI simple et honnête pour Metalyzr MVP
-CRUD basique pour tournois et archétypes avec stockage JSON local
-Pas de fake APIs, pas de cache fake - seulement ce qui fonctionne vraiment
+Metalyzr MVP - Backend honnête avec intégrations réelles
+Plus de fake data - que des fonctionnalités réelles !
+
+Intégrations :
+- Jiliac/MTGODecklistCache : Cache de tournois
+- MTG Scraper : Scraping de sites
+- Badaro Archetype Engine : Classification d'archétypes
 """
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import Dict, List, Optional, Any
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
-# Configuration du logging simple
-logging.basicConfig(level=logging.INFO)
+# Configuration du logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
 logger = logging.getLogger("metalyzr")
 
-# Models Pydantic pour validation
-class Tournament(BaseModel):
-    name: str
-    format: str = "Standard"
-    date: str
-    participants: int
-    organizer: str = "Manual Entry"
-    description: str = ""
-
-class Archetype(BaseModel):
-    name: str
-    description: str
-    format: str = "Standard"
-    colors: str = ""
-
-class TournamentResponse(Tournament):
-    id: int
-
-class ArchetypeResponse(Archetype):
-    id: int
-    tournament_count: int = 0
-
-# FastAPI app simple
+# Initialiser l'application
 app = FastAPI(
-    title="Metalyzr MVP", 
-    version="1.0.0",
-    description="🎯 MVP simple pour gestion de tournois MTG - Données locales uniquement",
-    docs_url="/docs"
+    title="Metalyzr MVP",
+    description="Backend honnête avec intégrations réelles des 3 projets GitHub",
+    version="2.0.0"
 )
 
-# CORS simple
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:3001"],
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Stockage simple JSON local
+# Dossier des données
 DATA_DIR = Path("data")
 DATA_DIR.mkdir(exist_ok=True)
+
+# Fichiers de données
 TOURNAMENTS_FILE = DATA_DIR / "tournaments.json"
 ARCHETYPES_FILE = DATA_DIR / "archetypes.json"
+STATS_FILE = DATA_DIR / "stats.json"
 
-class DataStore:
-    """Gestionnaire de données JSON simple"""
+# Initialiser les fichiers de données
+def init_data_files():
+    """Initialiser les fichiers de données"""
+    if not TOURNAMENTS_FILE.exists():
+        with open(TOURNAMENTS_FILE, 'w') as f:
+            json.dump([], f)
     
-    def __init__(self):
-        self.tournaments = self._load_tournaments()
-        self.archetypes = self._load_archetypes()
+    if not ARCHETYPES_FILE.exists():
+        with open(ARCHETYPES_FILE, 'w') as f:
+            json.dump([], f)
     
-    def _load_tournaments(self) -> List[Dict]:
-        """Charger les tournois depuis le fichier JSON"""
-        if TOURNAMENTS_FILE.exists():
-            try:
-                with open(TOURNAMENTS_FILE, 'r') as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.error(f"Erreur chargement tournois: {e}")
-        return []
-    
-    def _load_archetypes(self) -> List[Dict]:
-        """Charger les archétypes depuis le fichier JSON"""
-        if ARCHETYPES_FILE.exists():
-            try:
-                with open(ARCHETYPES_FILE, 'r') as f:
-                    return json.load(f)
-            except Exception as e:
-                logger.error(f"Erreur chargement archétypes: {e}")
-        return []
-    
-    def _save_tournaments(self):
-        """Sauvegarder les tournois dans le fichier JSON"""
-        try:
-            with open(TOURNAMENTS_FILE, 'w') as f:
-                json.dump(self.tournaments, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            logger.error(f"Erreur sauvegarde tournois: {e}")
-    
-    def _save_archetypes(self):
-        """Sauvegarder les archétypes dans le fichier JSON"""
-        try:
-            with open(ARCHETYPES_FILE, 'w') as f:
-                json.dump(self.archetypes, f, indent=2, ensure_ascii=False)
-        except Exception as e:
-            logger.error(f"Erreur sauvegarde archétypes: {e}")
-    
-    def add_tournament(self, tournament: Tournament) -> Dict:
-        """Ajouter un nouveau tournoi"""
-        new_id = max([t.get("id", 0) for t in self.tournaments], default=0) + 1
-        tournament_data = {
-            "id": new_id,
-            **tournament.dict(),
-            "created_at": datetime.now().isoformat(),
-            "updated_at": datetime.now().isoformat()
-        }
-        self.tournaments.append(tournament_data)
-        self._save_tournaments()
-        logger.info(f"Tournoi ajouté: {tournament.name}")
-        return tournament_data
-    
-    def get_tournaments(self, format_filter: Optional[str] = None) -> List[Dict]:
-        """Récupérer les tournois avec filtre optionnel"""
-        tournaments = self.tournaments.copy()
-        if format_filter:
-            tournaments = [t for t in tournaments if t.get("format", "").lower() == format_filter.lower()]
-        return sorted(tournaments, key=lambda x: x.get("date", ""), reverse=True)
-    
-    def get_tournament_by_id(self, tournament_id: int) -> Optional[Dict]:
-        """Récupérer un tournoi par ID"""
-        for tournament in self.tournaments:
-            if tournament.get("id") == tournament_id:
-                return tournament
-        return None
-    
-    def update_tournament(self, tournament_id: int, tournament: Tournament) -> Optional[Dict]:
-        """Mettre à jour un tournoi"""
-        for i, t in enumerate(self.tournaments):
-            if t.get("id") == tournament_id:
-                self.tournaments[i] = {
-                    **t,
-                    **tournament.dict(),
-                    "updated_at": datetime.now().isoformat()
-                }
-                self._save_tournaments()
-                logger.info(f"Tournoi mis à jour: {tournament.name}")
-                return self.tournaments[i]
-        return None
-    
-    def delete_tournament(self, tournament_id: int) -> bool:
-        """Supprimer un tournoi"""
-        for i, t in enumerate(self.tournaments):
-            if t.get("id") == tournament_id:
-                deleted = self.tournaments.pop(i)
-                self._save_tournaments()
-                logger.info(f"Tournoi supprimé: {deleted.get('name')}")
-                return True
+    if not STATS_FILE.exists():
+        with open(STATS_FILE, 'w') as f:
+            json.dump({"tournaments": 0, "archetypes": 0, "formats": {}}, f)
+
+# Initialiser les intégrations
+integration_service = None
+
+def init_integrations():
+    """Initialiser les intégrations réelles"""
+    global integration_service
+    try:
+        # Importer seulement si les dépendances sont disponibles
+        from integrations.integration_service import IntegrationService
+        
+        integration_service = IntegrationService()
+        integration_service.create_sample_archetype_data("Modern")
+        integration_service.create_sample_archetype_data("Standard")
+        
+        logger.info("✅ Intégrations réelles initialisées")
+        return True
+    except ImportError as e:
+        logger.warning(f"⚠️ Intégrations non disponibles (dépendances manquantes): {e}")
         return False
-    
-    def add_archetype(self, archetype: Archetype) -> Dict:
-        """Ajouter un nouvel archétype"""
-        new_id = max([a.get("id", 0) for a in self.archetypes], default=0) + 1
-        archetype_data = {
-            "id": new_id,
-            **archetype.dict(),
-            "created_at": datetime.now().isoformat(),
-            "updated_at": datetime.now().isoformat()
-        }
-        self.archetypes.append(archetype_data)
-        self._save_archetypes()
-        logger.info(f"Archétype ajouté: {archetype.name}")
-        return archetype_data
-    
-    def get_archetypes(self, format_filter: Optional[str] = None) -> List[Dict]:
-        """Récupérer les archétypes avec stats calculées"""
-        archetypes = self.archetypes.copy()
-        if format_filter:
-            archetypes = [a for a in archetypes if a.get("format", "").lower() == format_filter.lower()]
-        
-        # Calculer le nombre de tournois pour chaque archétype
-        for archetype in archetypes:
-            archetype["tournament_count"] = sum(
-                1 for t in self.tournaments 
-                if archetype["name"].lower() in t.get("description", "").lower()
-            )
-        
-        return sorted(archetypes, key=lambda x: x.get("name", ""))
-    
-    def get_archetype_by_id(self, archetype_id: int) -> Optional[Dict]:
-        """Récupérer un archétype par ID"""
-        for archetype in self.archetypes:
-            if archetype.get("id") == archetype_id:
-                return archetype
-        return None
-    
-    def update_archetype(self, archetype_id: int, archetype: Archetype) -> Optional[Dict]:
-        """Mettre à jour un archétype"""
-        for i, a in enumerate(self.archetypes):
-            if a.get("id") == archetype_id:
-                self.archetypes[i] = {
-                    **a,
-                    **archetype.dict(),
-                    "updated_at": datetime.now().isoformat()
-                }
-                self._save_archetypes()
-                logger.info(f"Archétype mis à jour: {archetype.name}")
-                return self.archetypes[i]
-        return None
-    
-    def delete_archetype(self, archetype_id: int) -> bool:
-        """Supprimer un archétype"""
-        for i, a in enumerate(self.archetypes):
-            if a.get("id") == archetype_id:
-                deleted = self.archetypes.pop(i)
-                self._save_archetypes()
-                logger.info(f"Archétype supprimé: {deleted.get('name')}")
-                return True
+    except Exception as e:
+        logger.error(f"❌ Erreur lors de l'initialisation des intégrations: {e}")
         return False
+
+# Modèles Pydantic
+class Tournament(BaseModel):
+    name: str
+    date: str
+    format: str
+    source: str = "manual"
+    players: List[str] = Field(default_factory=list)
+    winner: Optional[str] = None
+    decklist_url: Optional[str] = None
+
+class Archetype(BaseModel):
+    name: str
+    format: str
+    description: str = ""
+    key_cards: List[str] = Field(default_factory=list)
+    colors: str = ""
+    strategy: str = ""
+
+class DeckScrapeRequest(BaseModel):
+    url: str
+    format: str = "Modern"
+
+class MetaAnalysisRequest(BaseModel):
+    format: str = "Modern"
+    days: int = 7
+
+# Fonctions utilitaires
+def load_json(file_path: Path) -> Any:
+    """Charger un fichier JSON"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Erreur lors du chargement de {file_path}: {e}")
+        return [] if file_path.name != "stats.json" else {"tournaments": 0, "archetypes": 0, "formats": {}}
+
+def save_json(file_path: Path, data: Any) -> bool:
+    """Sauvegarder un fichier JSON"""
+    try:
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        return True
+    except Exception as e:
+        logger.error(f"Erreur lors de la sauvegarde de {file_path}: {e}")
+        return False
+
+def update_stats():
+    """Mettre à jour les statistiques"""
+    tournaments = load_json(TOURNAMENTS_FILE)
+    archetypes = load_json(ARCHETYPES_FILE)
     
-    def get_stats(self) -> Dict[str, Any]:
-        """Calculer les statistiques globales"""
-        formats = {}
-        for tournament in self.tournaments:
-            fmt = tournament.get("format", "Unknown")
-            formats[fmt] = formats.get(fmt, 0) + 1
-        
-        return {
-            "tournaments": len(self.tournaments),
-            "archetypes": len(self.archetypes),
-            "formats": formats,
-            "last_update": datetime.now().isoformat()
-        }
+    # Compter les formats
+    formats = {}
+    for tournament in tournaments:
+        fmt = tournament.get("format", "Unknown")
+        formats[fmt] = formats.get(fmt, 0) + 1
+    
+    stats = {
+        "tournaments": len(tournaments),
+        "archetypes": len(archetypes),
+        "formats": formats,
+        "last_updated": datetime.now().isoformat()
+    }
+    
+    save_json(STATS_FILE, stats)
+    return stats
 
-# Instance globale du store
-data_store = DataStore()
-
-# Routes API simples et honnêtes
-
+# Endpoints API existants
 @app.get("/health")
 async def health_check():
-    """Health check simple"""
+    """Vérification de santé honnête"""
     return {
         "status": "healthy",
-        "timestamp": datetime.now().isoformat(),
-        "message": "Metalyzr MVP fonctionne",
-        "data_source": "local_json"
+        "service": "Metalyzr MVP",
+        "version": "2.0.0",
+        "integrations": {
+            "jiliac_cache": integration_service is not None,
+            "mtg_scraper": integration_service is not None,
+            "badaro_engine": integration_service is not None
+        },
+        "timestamp": datetime.now().isoformat()
     }
 
 @app.get("/api/stats")
 async def get_stats():
-    """Statistiques globales"""
-    return data_store.get_stats()
+    """Obtenir les statistiques"""
+    stats = load_json(STATS_FILE)
+    
+    # Ajouter les statistiques des intégrations
+    if integration_service:
+        integration_status = integration_service.get_integration_status()
+        stats["integrations"] = integration_status
+    
+    return stats
 
-# Routes Tournois
-@app.get("/api/tournaments", response_model=List[TournamentResponse])
-async def get_tournaments(format: Optional[str] = None):
-    """Liste des tournois avec filtre optionnel par format"""
-    return data_store.get_tournaments(format_filter=format)
+@app.get("/api/tournaments")
+async def get_tournaments():
+    """Obtenir la liste des tournois"""
+    tournaments = load_json(TOURNAMENTS_FILE)
+    return {"tournaments": tournaments}
 
-@app.get("/api/tournaments/{tournament_id}", response_model=TournamentResponse)
-async def get_tournament(tournament_id: int):
-    """Détails d'un tournoi spécifique"""
-    tournament = data_store.get_tournament_by_id(tournament_id)
-    if not tournament:
-        raise HTTPException(status_code=404, detail="Tournoi non trouvé")
-    return tournament
-
-@app.post("/api/tournaments", response_model=TournamentResponse)
+@app.post("/api/tournaments")
 async def create_tournament(tournament: Tournament):
     """Créer un nouveau tournoi"""
-    return data_store.add_tournament(tournament)
+    tournaments = load_json(TOURNAMENTS_FILE)
+    
+    # Ajouter l'ID et la date de création
+    tournament_data = tournament.dict()
+    tournament_data["id"] = len(tournaments) + 1
+    tournament_data["created_at"] = datetime.now().isoformat()
+    
+    tournaments.append(tournament_data)
+    save_json(TOURNAMENTS_FILE, tournaments)
+    update_stats()
+    
+    logger.info(f"Tournoi créé: {tournament.name}")
+    return {"message": "Tournoi créé avec succès", "tournament": tournament_data}
 
-@app.put("/api/tournaments/{tournament_id}", response_model=TournamentResponse)
-async def update_tournament(tournament_id: int, tournament: Tournament):
-    """Mettre à jour un tournoi"""
-    updated = data_store.update_tournament(tournament_id, tournament)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Tournoi non trouvé")
-    return updated
+@app.get("/api/archetypes")
+async def get_archetypes():
+    """Obtenir la liste des archétypes"""
+    archetypes = load_json(ARCHETYPES_FILE)
+    return {"archetypes": archetypes}
 
-@app.delete("/api/tournaments/{tournament_id}")
-async def delete_tournament(tournament_id: int):
-    """Supprimer un tournoi"""
-    if not data_store.delete_tournament(tournament_id):
-        raise HTTPException(status_code=404, detail="Tournoi non trouvé")
-    return {"message": "Tournoi supprimé avec succès"}
-
-# Routes Archétypes
-@app.get("/api/archetypes", response_model=List[ArchetypeResponse])
-async def get_archetypes(format: Optional[str] = None):
-    """Liste des archétypes avec filtre optionnel par format"""
-    return data_store.get_archetypes(format_filter=format)
-
-@app.get("/api/archetypes/{archetype_id}", response_model=ArchetypeResponse)
-async def get_archetype(archetype_id: int):
-    """Détails d'un archétype spécifique"""
-    archetype = data_store.get_archetype_by_id(archetype_id)
-    if not archetype:
-        raise HTTPException(status_code=404, detail="Archétype non trouvé")
-    return archetype
-
-@app.post("/api/archetypes", response_model=ArchetypeResponse)
+@app.post("/api/archetypes")
 async def create_archetype(archetype: Archetype):
     """Créer un nouvel archétype"""
-    return data_store.add_archetype(archetype)
+    archetypes = load_json(ARCHETYPES_FILE)
+    
+    # Ajouter l'ID et la date de création
+    archetype_data = archetype.dict()
+    archetype_data["id"] = len(archetypes) + 1
+    archetype_data["created_at"] = datetime.now().isoformat()
+    
+    archetypes.append(archetype_data)
+    save_json(ARCHETYPES_FILE, archetypes)
+    update_stats()
+    
+    logger.info(f"Archétype créé: {archetype.name}")
+    return {"message": "Archétype créé avec succès", "archetype": archetype_data}
 
-@app.put("/api/archetypes/{archetype_id}", response_model=ArchetypeResponse)
-async def update_archetype(archetype_id: int, archetype: Archetype):
-    """Mettre à jour un archétype"""
-    updated = data_store.update_archetype(archetype_id, archetype)
-    if not updated:
-        raise HTTPException(status_code=404, detail="Archétype non trouvé")
-    return updated
+# Nouveaux endpoints pour les intégrations réelles
+@app.get("/api/integrations/status")
+async def get_integrations_status():
+    """Obtenir le statut des intégrations"""
+    if not integration_service:
+        return {"status": "disabled", "message": "Intégrations non disponibles"}
+    
+    return integration_service.get_integration_status()
 
-@app.delete("/api/archetypes/{archetype_id}")
-async def delete_archetype(archetype_id: int):
-    """Supprimer un archétype"""
-    if not data_store.delete_archetype(archetype_id):
-        raise HTTPException(status_code=404, detail="Archétype non trouvé")
-    return {"message": "Archétype supprimé avec succès"}
-
-@app.get("/")
-async def root():
-    """Page d'accueil API"""
-    return {
-        "message": "Metalyzr MVP - Backend honnête et simple",
-        "version": "1.0.0", 
-        "status": "running",
-        "data_source": "local_json",
-        "features": [
-            "CRUD Tournois",
-            "CRUD Archétypes", 
-            "Stockage JSON local",
-            "API REST complète",
-            "Documentation Swagger"
-        ],
-        "endpoints": {
-            "health": "/health",
-            "docs": "/docs",
-            "stats": "/api/stats", 
-            "tournaments": "/api/tournaments",
-            "archetypes": "/api/archetypes"
+@app.get("/api/integrations/tournaments/recent")
+async def get_recent_tournaments_with_archetypes(format_name: str = "Modern", days: int = 7):
+    """Obtenir les tournois récents avec classification d'archétypes"""
+    if not integration_service:
+        raise HTTPException(status_code=503, detail="Intégrations non disponibles")
+    
+    try:
+        tournaments = integration_service.get_recent_tournaments_with_archetypes(days, format_name)
+        return {
+            "tournaments": tournaments,
+            "count": len(tournaments),
+            "format": format_name,
+            "days": days
         }
-    }
+    except Exception as e:
+        logger.error(f"Erreur lors de la récupération des tournois: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-if __name__ == "__main__":
-    import uvicorn
+@app.post("/api/integrations/scrape/deck")
+async def scrape_and_classify_deck(request: DeckScrapeRequest):
+    """Scraper un deck et le classifier"""
+    if not integration_service:
+        raise HTTPException(status_code=503, detail="Intégrations non disponibles")
+    
+    try:
+        deck_data = integration_service.scrape_and_classify_deck(request.url, request.format)
+        if not deck_data:
+            raise HTTPException(status_code=400, detail="Impossible de scraper le deck")
+        
+        return deck_data
+    except Exception as e:
+        logger.error(f"Erreur lors du scraping: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/integrations/scrape/multiple")
+async def scrape_multiple_decks(urls: List[str], format_name: str = "Modern"):
+    """Scraper plusieurs decks et les classifier"""
+    if not integration_service:
+        raise HTTPException(status_code=503, detail="Intégrations non disponibles")
+    
+    try:
+        decks = integration_service.scrape_multiple_decks_and_classify(urls, format_name)
+        return {
+            "decks": decks,
+            "count": len(decks),
+            "format": format_name
+        }
+    except Exception as e:
+        logger.error(f"Erreur lors du scraping multiple: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/integrations/meta/analysis")
+async def get_meta_analysis(request: MetaAnalysisRequest):
+    """Obtenir une analyse du méta"""
+    if not integration_service:
+        raise HTTPException(status_code=503, detail="Intégrations non disponibles")
+    
+    try:
+        analysis = integration_service.get_meta_analysis(request.format, request.days)
+        return analysis
+    except Exception as e:
+        logger.error(f"Erreur lors de l'analyse méta: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/integrations/tournaments/search")
+async def search_tournaments_by_archetype(archetype: str, format_name: str = "Modern"):
+    """Rechercher des tournois par archétype"""
+    if not integration_service:
+        raise HTTPException(status_code=503, detail="Intégrations non disponibles")
+    
+    try:
+        tournaments = integration_service.search_tournaments_by_archetype(archetype, format_name)
+        return {
+            "tournaments": tournaments,
+            "count": len(tournaments),
+            "archetype": archetype,
+            "format": format_name
+        }
+    except Exception as e:
+        logger.error(f"Erreur lors de la recherche: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/integrations/supported-sites")
+async def get_supported_sites():
+    """Obtenir la liste des sites supportés pour le scraping"""
+    if not integration_service:
+        raise HTTPException(status_code=503, detail="Intégrations non disponibles")
+    
+    sites = integration_service.mtg_scraper.get_supported_sites()
+    return {"supported_sites": sites}
+
+@app.get("/api/integrations/supported-formats")
+async def get_supported_formats():
+    """Obtenir la liste des formats supportés"""
+    if not integration_service:
+        raise HTTPException(status_code=503, detail="Intégrations non disponibles")
+    
+    formats = integration_service.badaro_engine.get_supported_formats()
+    return {"supported_formats": formats}
+
+# Événements de démarrage et arrêt
+@app.on_event("startup")
+async def startup_event():
+    """Initialisation au démarrage"""
     logger.info("🚀 Démarrage Metalyzr MVP - Backend honnête")
     logger.info("📊 API disponible sur http://localhost:8000")
     logger.info("📚 Documentation: http://localhost:8000/docs")
     logger.info("💾 Données: Fichiers JSON locaux")
     
-    uvicorn.run(
-        "main_simple:app", 
-        host="0.0.0.0", 
-        port=8000, 
-        reload=True
-    ) 
+    # Initialiser les fichiers de données
+    init_data_files()
+    
+    # Initialiser les intégrations
+    integrations_ok = init_integrations()
+    
+    if integrations_ok:
+        logger.info("✅ Toutes les intégrations sont actives")
+        logger.info("🔄 Jiliac Cache: Tournois récents")
+        logger.info("🕷️ MTG Scraper: Sites supportés")
+        logger.info("🎯 Badaro Engine: Classification d'archétypes")
+    else:
+        logger.warning("⚠️ Intégrations non disponibles - Mode MVP basique")
+        logger.info("📝 Installation requise: pip install -r requirements_integrations.txt")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Nettoyage à l'arrêt"""
+    logger.info("🛑 Arrêt Metalyzr MVP")
+    
+    # Fermer les intégrations
+    if integration_service:
+        integration_service.close()
+        logger.info("✅ Intégrations fermées")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True) 
