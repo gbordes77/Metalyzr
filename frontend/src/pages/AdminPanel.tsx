@@ -1,19 +1,56 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { metagameApiService } from '../../services/api';
 import { Card } from '../../components/ui/Card';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import ErrorMessage from '../../components/ui/ErrorMessage';
 
+// Define the type for the status object
+interface ITaskStatus {
+    status: 'idle' | 'running' | 'completed' | 'failed';
+    progress: number;
+    total: number;
+    message: string;
+    error: string | null;
+}
+
 const AdminPanel: React.FC = () => {
     const [formats, setFormats] = useState<string[]>([]);
     const [selectedFormat, setSelectedFormat] = useState<string>('');
     const [startDate, setStartDate] = useState<string>('');
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true); // Loading formats initially
     const [error, setError] = useState<string | null>(null);
     const [notification, setNotification] = useState<string | null>(null);
+    
+    const [taskStatus, setTaskStatus] = useState<ITaskStatus | null>(null);
+    const pollingInterval = useRef<NodeJS.Timeout | null>(null);
+
+    const fetchTaskStatus = async () => {
+        try {
+            const status = await metagameApiService.getPopulationStatus();
+            setTaskStatus(status);
+
+            if (status.status === 'completed' || status.status === 'failed') {
+                if (pollingInterval.current) {
+                    clearInterval(pollingInterval.current);
+                    pollingInterval.current = null;
+                }
+                if (status.status === 'completed') {
+                    setNotification('Data population completed successfully!');
+                } else {
+                    setError(`Data population failed: ${status.error}`);
+                }
+            }
+        } catch (err) {
+            setError('Could not fetch task status.');
+            if (pollingInterval.current) {
+                clearInterval(pollingInterval.current);
+                pollingInterval.current = null;
+            }
+        }
+    };
 
     useEffect(() => {
-        const fetchFormats = async () => {
+        const fetchInitialData = async () => {
             try {
                 setIsLoading(true);
                 setError(null);
@@ -22,90 +59,121 @@ const AdminPanel: React.FC = () => {
                 if (supportedFormats.length > 0) {
                     setSelectedFormat(supportedFormats[0]);
                 }
+                // Also fetch initial task status in case a task was already running
+                await fetchTaskStatus();
             } catch (err) {
-                setError('Failed to fetch supported formats.');
-                console.error(err);
+                setError('Failed to load supported formats.');
             } finally {
                 setIsLoading(false);
             }
         };
 
-        fetchFormats();
+        fetchInitialData();
+
+        return () => {
+            if (pollingInterval.current) {
+                clearInterval(pollingInterval.current);
+            }
+        };
     }, []);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
+    useEffect(() => {
+        // If a task is running, start polling
+        if (taskStatus?.status === 'running' && !pollingInterval.current) {
+            pollingInterval.current = setInterval(fetchTaskStatus, 2000); // Poll every 2 seconds
+        }
+    }, [taskStatus]);
+
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
         setError(null);
         setNotification(null);
+        
+        if (taskStatus?.status === 'running') {
+            setError("A task is already in progress.");
+            return;
+        }
+
         try {
             const response = await metagameApiService.populateDatabase(selectedFormat, startDate);
             setNotification(response.message);
-        } catch (err) {
-            setError('Failed to start data population task.');
-            console.error(err);
-        } finally {
-            setIsLoading(false);
+            // Immediately start polling for status
+            await fetchTaskStatus();
+        } catch (err: any) {
+            setError(err.message || 'An unexpected error occurred.');
         }
     };
+    
+    const isTaskRunning = taskStatus?.status === 'running';
 
     return (
         <div className="container mx-auto p-4">
             <h1 className="text-2xl font-bold mb-4">Admin Panel</h1>
             <Card>
-                <h2 className="text-xl font-semibold mb-2">Populate Metagame Database</h2>
+                <h2 className="text-xl font-semibold mb-2">Populate Database</h2>
                 <p className="text-gray-600 mb-4">
-                    Select a format and a start date to fetch tournament data from Melee.gg.
-                    If no filters are selected, recent data for major formats will be fetched.
+                    Fetch tournament data from Melee.gg. You can filter by format and start date.
                 </p>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                        <div>
-                            <label htmlFor="format-select" className="block text-sm font-medium text-gray-700">
-                                Format
-                            </label>
-                            <select
-                                id="format-select"
-                                value={selectedFormat}
-                                onChange={(e) => setSelectedFormat(e.target.value)}
-                                className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                            >
-                                {formats.map(format => (
-                                    <option key={format} value={format}>{format}</option>
-                                ))}
-                            </select>
+                {isLoading ? (
+                    <LoadingSpinner />
+                ) : error && !taskStatus?.error ? (
+                    <ErrorMessage message={error} />
+                ) : (
+                    <form onSubmit={handleSubmit}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label htmlFor="format" className="block text-sm font-medium text-gray-700">Format</label>
+                                <select
+                                    id="format"
+                                    value={selectedFormat}
+                                    onChange={(e) => setSelectedFormat(e.target.value)}
+                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                                    disabled={isTaskRunning}
+                                >
+                                    {formats.map(f => <option key={f} value={f}>{f}</option>)}
+                                </select>
+                            </div>
+                            <div>
+                                <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">Start Date</label>
+                                <input
+                                    type="date"
+                                    id="start-date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md"
+                                    disabled={isTaskRunning}
+                                />
+                            </div>
                         </div>
-                        <div>
-                            <label htmlFor="start-date" className="block text-sm font-medium text-gray-700">
-                                Start Date
-                            </label>
-                            <input
-                                type="date"
-                                id="start-date"
-                                value={startDate}
-                                onChange={(e) => setStartDate(e.target.value)}
-                                className="mt-1 block w-full pl-3 pr-2 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                            />
-                        </div>
-                    </div>
-                    <div className="flex items-center">
-                        <button
-                            type="submit"
-                            disabled={isLoading}
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-indigo-300"
+                        <button 
+                            type="submit" 
+                            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:bg-gray-400"
+                            disabled={isTaskRunning}
                         >
-                            {isLoading && <LoadingSpinner />}
-                            Fetch Data
+                            {isTaskRunning ? 'Fetching Data...' : 'Fetch Data'}
                         </button>
-                    </div>
-                </form>
-                {error && <ErrorMessage message={error} />}
-                {notification && (
-                    <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md">
-                        {notification}
-                    </div>
+                    </form>
                 )}
             </Card>
+
+            {notification && <div className="mt-4 p-3 bg-green-100 text-green-800 rounded-md">{notification}</div>}
+            {taskStatus?.error && <ErrorMessage message={taskStatus.error} />}
+
+            {isTaskRunning && taskStatus && (
+                <Card className="mt-4">
+                    <h3 className="text-lg font-semibold">Task Progress</h3>
+                    <p className="text-gray-700 mb-2">{taskStatus.message}</p>
+                    <div className="w-full bg-gray-200 rounded-full h-4">
+                        <div 
+                            className="bg-blue-600 h-4 rounded-full transition-all duration-500"
+                            style={{ width: `${taskStatus.total > 0 ? (taskStatus.progress / taskStatus.total) * 100 : 0}%` }}
+                        ></div>
+                    </div>
+                    <p className="text-right text-sm text-gray-600 mt-1">
+                        {taskStatus.progress} / {taskStatus.total}
+                    </p>
+                </Card>
+            )}
         </div>
     );
 };

@@ -3,35 +3,36 @@ version: '3.8'
 services:
   backend:
     build:
-      context: ./backend
+      context: .
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
-      # Mount the scrapers directory to be accessible by the backend service
-      - ./scrapers:/app/scrapers
-      - ./cache:/app/cache
     environment:
+      - STARTGG_API_KEY=014654eb91e813ee1785dcdbeffd129a
       - DATABASE_URL=postgresql://user:password@db:5432/metalyzr
-      # In a real scenario, use Docker secrets for credentials
-      - MELEE_EMAIL=your_email@example.com
-      - MELEE_PASSWORD=your_melee_password
-      - TOPDECK_API_KEY=your_topdeck_api_key
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   db:
-    image: postgres:15-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
+    image: postgres:15
+    container_name: metalyzr-db-1
     environment:
       - POSTGRES_USER=user
       - POSTGRES_PASSWORD=password
       - POSTGRES_DB=metalyzr
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d metalyzr"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data: 

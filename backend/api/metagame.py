@@ -9,16 +9,35 @@ from database import DatabaseClient
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
+# --- Status Tracking ---
+# Simple in-memory dict to hold the state of the background task.
+# In a larger application, this would be replaced by Redis or a database table.
+task_status: Dict[str, Any] = {
+    "status": "idle", # idle, running, completed, failed
+    "progress": 0,
+    "total": 0,
+    "message": "",
+    "error": None,
+}
+
 # --- Client Initialization ---
 db_client = DatabaseClient()
-metagame_service = MetagameService(database_client=db_client)
+# Pass the status dict to the service so it can update it
+metagame_service = MetagameService(database_client=db_client, task_status_dict=task_status)
 
 # --- Constants ---
 SUPPORTED_FORMATS = [
     "Standard", "Modern", "Legacy", "Vintage", "Pioneer", "Pauper", "Commander", "Limited"
 ]
 
-# --- New Endpoints ---
+# --- API Endpoints ---
+
+@router.get("/population-status")
+def get_population_status() -> Dict[str, Any]:
+    """
+    Returns the current status of the data population background task.
+    """
+    return task_status
 
 @router.get("/formats")
 def get_supported_formats() -> List[str]:
@@ -34,32 +53,16 @@ async def populate_database(
     start_date: Optional[date] = None
 ):
     """
-    Endpoint to trigger the data update process from Melee.gg,
-    with optional filters for format and start date.
-    If no filters are provided, it fetches data for major formats over the last 14 days.
+    Endpoint to trigger the full data update process from Melee.gg.
+    This is a long-running task executed in the background.
     """
-    if format_name and format_name not in SUPPORTED_FORMATS:
-        raise HTTPException(status_code=400, detail=f"Format '{format_name}' is not supported.")
+    if task_status["status"] == "running":
+        raise HTTPException(status_code=409, detail="A data population task is already in progress.")
 
-    days_to_fetch = (datetime.now().date() - start_date).days if start_date else 14
-    formats_to_fetch = [format_name] if format_name else ["Modern", "Legacy", "Pioneer"]
-
-    try:
-        background_tasks.add_task(
-            metagame_service.update_metagame_data, 
-            formats=formats_to_fetch, 
-            days=days_to_fetch
-        )
-        return {
-            "message": "Metagame data update started in the background.",
-            "parameters": {
-                "formats": formats_to_fetch,
-                "days": days_to_fetch
-            }
-        }
-    except Exception as e:
-        logger.error(f"Failed to start metagame update task: {e}", exc_info=True)
-        raise HTTPException(status_code=500, detail="Internal server error")
+    # Reset status and run the task
+    task_status.update({"status": "running", "progress": 0, "total": 0, "message": "Initializing...", "error": None})
+    background_tasks.add_task(metagame_service.update_metagame_data, format_name=format_name, start_date=start_date)
+    return {"message": "Metagame data update started in the background."}
 
 # --- Analysis Endpoints ---
 

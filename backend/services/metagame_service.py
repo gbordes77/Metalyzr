@@ -5,14 +5,14 @@ Service to manage the Metagame data pipeline.
 - Loads the data into the database.
 """
 import logging
-import json
 import asyncio
-from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from datetime import datetime, date
+from typing import Dict, List, Any, Optional
 
 # Integrations
+from integrations.startgg_client import StartGGClient
+# Removed MTGGoldfish scraper
 from integrations.badaro_archetype_engine import BadaroArchetypeEngine
-from integrations.melee_client import MeleeAPIClient
 from database import DatabaseClient
 
 logger = logging.getLogger(__name__)
@@ -20,70 +20,53 @@ logger = logging.getLogger(__name__)
 class MetagameService:
     """Service to manage the metagame data pipeline using Melee.gg API."""
     
-    def __init__(self, database_client: DatabaseClient, cache_dir: str = "cache/metagame_service"):
+    def __init__(self, database_client: DatabaseClient, task_status_dict: Dict[str, Any]):
         self.db_client = database_client
-        self.badaro_engine = BadaroArchetypeEngine(cache_dir)
-        # Melee client does not need to be a class member if used in one method
-        logger.info("MetagameService initialized for Melee.gg integration.")
+        self.startgg_client = StartGGClient()
+        self.archetype_engine = BadaroArchetypeEngine()
+        self.task_status = task_status_dict
 
-    async def update_metagame_data(self, formats: List[str] = ["Modern"], days: int = 7) -> Dict[str, Any]:
-        """
-        Main ETL method. Fetches recent tournaments from Melee.gg, classifies them,
-        and updates the database.
-        """
-        logger.info(f"Starting metagame update for formats {formats} for the last {days} days.")
-        
-        async with MeleeAPIClient() as melee_client:
-            tasks = [self._process_format(melee_client, f, days) for f in formats]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
+    def _update_status(self, progress: int, total: int, message: str):
+        self.task_status.update({
+            "progress": progress,
+            "total": total,
+            "message": message,
+        })
+        logger.info(f"[Status Update] {message} ({progress}/{total})")
 
-        processed_tournaments = sum(r for r in results if isinstance(r, int))
-        errors = [r for r in results if isinstance(r, Exception)]
-        if errors:
-            logger.error(f"Encountered {len(errors)} errors during update: {errors}")
-
-        return {
-            "status": "success" if not errors else "partial_success",
-            "processed_tournaments": processed_tournaments,
-            "errors": len(errors)
-        }
-        
-    async def _process_format(self, client: MeleeAPIClient, format_name: str, days: int) -> int:
-        """Fetch and process all tournaments for a given format."""
-        logger.info(f"Processing format: {format_name}")
-        tournaments = await client.get_tournaments(format_name=format_name, limit=50)
-        
-        processed_count = 0
-        for tourney_summary in tournaments:
-            tournament_id = tourney_summary.get("id")
-            if not tournament_id:
-                continue
+    async def update_metagame_data(self, format_name: Optional[str] = "standard", start_date: Optional[date] = None):
+        try:
+            self.task_status.update({"status": "running", "error": None})
+            days_to_fetch = (datetime.now().date() - start_date).days if start_date else 7
             
-            # Check if tournament already processed to avoid re-fetching details
-            if self.db_client.execute_query("SELECT 1 FROM tournaments WHERE tournament_uuid = %s", (tournament_id,), fetch="one"):
-                logger.info(f"Skipping already processed tournament: {tourney_summary.get('name')}")
-                continue
+            # --- Step 1: Fetch from start.gg ---
+            self._update_status(0, 1, "Fetching tournaments from start.gg...")
+            startgg_tournaments = await self.startgg_client.get_tournaments_by_game(days_ago=days_to_fetch)
+            logger.info(f"Found {len(startgg_tournaments)} tournaments on start.gg.")
 
-            tournament_details = await client.get_tournament_details(tournament_id)
-            if not tournament_details:
-                continue
-                
-            classified_decks = []
-            for deck in tournament_details.get("decks", []):
-                deck_for_classification = {
-                    "mainboard": deck.get("mainboard", {}),
-                    "sideboard": deck.get("sideboard", {}),
-                }
-                classification = self.badaro_engine.classify_deck(deck_for_classification, format_name)
-                deck["archetype_classification"] = classification
-                classified_decks.append(deck)
-            tournament_details["decks"] = classified_decks
+            all_tournaments = startgg_tournaments
             
-            self._load_tournament_to_db(tournament_details)
-            processed_count += 1
-            await asyncio.sleep(1)
+            if not all_tournaments:
+                self._update_status(1, 1, "No new tournaments found from any source.")
+                self.task_status.update({"status": "completed"})
+                return
+
+            # --- Step 2: Process all tournaments ---
+            total_tournaments = len(all_tournaments)
+            self._update_status(0, total_tournaments, f"Processing {total_tournaments} found tournaments...")
             
-        return processed_count
+            processed_count = 0
+            for tournament_data in all_tournaments:
+                await self.db_client.save_tournament(tournament_data)
+                processed_count += 1
+                self._update_status(processed_count, total_tournaments, f"Saved tournament {processed_count}/{total_tournaments}: {tournament_data.get('name')}")
+
+            self.task_status.update({"status": "completed"})
+            logger.info("Metagame data update process completed successfully.")
+
+        except Exception as e:
+            logger.error(f"Error updating metagame data: {e}", exc_info=True)
+            self.task_status.update({"status": "failed", "error": str(e)})
 
     def _load_tournament_to_db(self, tournament_data: Dict[str, Any]):
         """

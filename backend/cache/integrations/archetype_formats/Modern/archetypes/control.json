@@ -1,0 +1,23 @@
+{
+  "name": "Control",
+  "include_color_in_name": true,
+  "conditions": [
+    {
+      "type": "OneOrMoreInMainboard",
+      "cards": [
+        "Counterspell",
+        "Mana Leak",
+        "Cryptic Command"
+      ]
+    },
+    {
+      "type": "OneOrMoreInMainboard",
+      "cards": [
+        "Wrath of God",
+        "Supreme Verdict",
+        "Damnation"
+      ]
+    }
+  ],
+  "variants": []
+}

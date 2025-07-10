@@ -1,0 +1,15 @@
+🚀 Metalyzr SPA Server démarré
+✅ Frontend: http://localhost:3000
+📊 Dashboard: http://localhost:3000
+👨‍💼 Admin: http://localhost:3000/admin
+🔗 Backend API: http://localhost:8000
+
+Press Ctrl+C to stop
+🔗 GET /
+   → SPA route, serving index.html
+(node:34613) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+   → Served /index.html (text/html)
+🔗 GET /
+   → SPA route, serving index.html
+   → Served /index.html (text/html)

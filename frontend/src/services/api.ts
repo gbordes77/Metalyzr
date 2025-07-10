@@ -36,19 +36,13 @@ export const metagameApiService = {
   getSupportedFormats: (): Promise<string[]> => {
     return apiService.get('/metagame/formats');
   },
-  populateDatabase: (format?: string, startDate?: string): Promise<{ message: string }> => {
-    let url = '/metagame/populate-database';
+  populateDatabase: (format?: string, startDate?: string) => {
     const params = new URLSearchParams();
-    if (format) {
-      params.append('format_name', format);
-    }
-    if (startDate) {
-      params.append('start_date', startDate);
-    }
-    const queryString = params.toString();
-    if (queryString) {
-      url += `?${queryString}`;
-    }
-    return apiService.post(url, {});
+    if (format) params.append('format_name', format);
+    if (startDate) params.append('start_date', startDate);
+    return apiService.post(`/metagame/populate-database?${params.toString()}`, {});
+  },
+  getPopulationStatus: (): Promise<any> => {
+    return apiService.get('/metagame/population-status');
   }
 }; 

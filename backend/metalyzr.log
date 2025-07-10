@@ -1,0 +1,261 @@
+2025-07-08 22:38:49,117 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr sécurisé...
+2025-07-08 22:38:49,117 - metalyzr.api - INFO - 📊 API disponible sur http://localhost:8000
+2025-07-08 22:38:49,117 - metalyzr.api - INFO - 🏥 Health check: http://localhost:8000/health
+2025-07-08 22:38:49,117 - metalyzr.api - INFO - 📈 Stats: http://localhost:8000/api/stats
+2025-07-08 22:38:49,117 - metalyzr.api - INFO - 💾 Cache sync: http://localhost:8000/api/cache/sync
+2025-07-08 22:38:49,117 - metalyzr.api - INFO - 📊 Metrics: http://localhost:8000/metrics
+2025-07-08 22:38:49,117 - metalyzr.api - INFO - 📚 Documentation: http://localhost:8000/docs
+2025-07-08 22:40:48,814 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr avec cache MTGODecklistCache...
+2025-07-08 22:40:48,814 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-08 22:40:48,814 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-08 22:40:49,173 - cache.mtgo - WARNING - No current tournament files found
+2025-07-08 22:40:49,173 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-08 22:40:49,173 - metalyzr.api - INFO - ✅ Cache MTGODecklistCache initialisé avec succès
+2025-07-08 22:40:49,174 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x1078a56a0>
+2025-07-08 22:40:49,174 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x107895970>, 27662.409841208)])']
+connector: <aiohttp.connector.TCPConnector object at 0x1078a57f0>
+2025-07-08 22:40:49,174 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-08 22:40:49,174 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-08 22:40:49,264 - cache.mtgo - WARNING - No current tournament files found
+2025-07-08 22:40:49,264 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-08 22:40:49,264 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-08 22:40:49,265 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-08 22:40:49,292 - cache.mtgo - WARNING - No current tournament files found
+2025-07-08 22:40:49,292 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-08 22:40:49,292 - metalyzr.api - INFO - 📊 Données chargées: 0 tournois, 0 decks, 0 archétypes
+2025-07-08 22:43:32,021 - metalyzr.api - INFO - Request completed
+2025-07-08 22:43:32,250 - metalyzr.api - INFO - Request completed
+2025-07-08 23:17:19,412 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr sécurisé...
+2025-07-08 23:17:19,412 - metalyzr.api - INFO - 📊 API disponible sur http://localhost:8000
+2025-07-08 23:17:19,412 - metalyzr.api - INFO - 🏥 Health check: http://localhost:8000/health
+2025-07-08 23:17:19,412 - metalyzr.api - INFO - 📈 Stats: http://localhost:8000/api/stats
+2025-07-08 23:17:19,412 - metalyzr.api - INFO - 💾 Cache sync: http://localhost:8000/api/cache/sync
+2025-07-08 23:17:19,412 - metalyzr.api - INFO - 📊 Metrics: http://localhost:8000/metrics
+2025-07-08 23:17:19,412 - metalyzr.api - INFO - 📚 Documentation: http://localhost:8000/docs
+2025-07-09 04:48:35,303 - watchfiles.main - INFO - 1 change detected
+2025-07-09 04:48:36,180 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr avec cache MTGODecklistCache...
+2025-07-09 04:48:36,181 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:48:36,181 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:48:36,272 - watchfiles.main - INFO - 3 changes detected
+2025-07-09 04:48:36,431 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:48:36,432 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:48:36,432 - metalyzr.api - INFO - ✅ Cache MTGODecklistCache initialisé avec succès
+2025-07-09 04:48:36,432 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x109f156a0>
+2025-07-09 04:48:36,432 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x109ef36b0>, 49729.561191)])']
+connector: <aiohttp.connector.TCPConnector object at 0x109f157f0>
+2025-07-09 04:48:36,432 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:48:36,432 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:48:36,524 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:48:36,524 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:48:36,524 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:48:36,524 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:48:36,552 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:48:36,552 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:48:36,553 - metalyzr.api - INFO - 📊 Données chargées: 0 tournois, 0 decks, 0 archétypes
+2025-07-09 04:48:49,655 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr sécurisé...
+2025-07-09 04:48:49,655 - metalyzr.api - INFO - 📊 API disponible sur http://localhost:8000
+2025-07-09 04:48:49,655 - metalyzr.api - INFO - 🏥 Health check: http://localhost:8000/health
+2025-07-09 04:48:49,655 - metalyzr.api - INFO - 📈 Stats: http://localhost:8000/api/stats
+2025-07-09 04:48:49,655 - metalyzr.api - INFO - 💾 Cache sync: http://localhost:8000/api/cache/sync
+2025-07-09 04:48:49,656 - metalyzr.api - INFO - 📊 Metrics: http://localhost:8000/metrics
+2025-07-09 04:48:49,656 - metalyzr.api - INFO - 📚 Documentation: http://localhost:8000/docs
+2025-07-09 04:48:49,753 - watchfiles.main - INFO - 1 change detected
+2025-07-09 04:48:54,407 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:48:54,408 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:48:54,494 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:48:54,494 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:48:54,495 - metalyzr.api - INFO - Request completed
+2025-07-09 04:49:23,641 - metalyzr.api - INFO - Request completed
+2025-07-09 04:49:48,159 - metalyzr.api - INFO - Request completed
+2025-07-09 04:49:48,366 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,046 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,046 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,047 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,047 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,048 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:50:35,048 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:50:35,050 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:50:35,050 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:50:35,050 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,050 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,315 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:50:35,315 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:50:35,316 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:35,316 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x109f52710>
+2025-07-09 04:50:35,317 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x10a47c0b0>, 49848.445422666)])']
+connector: <aiohttp.connector.TCPConnector object at 0x109f520d0>
+2025-07-09 04:50:35,317 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:50:35,317 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:50:35,318 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:41,693 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:50:41,694 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:50:41,695 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:50:41,695 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:50:41,696 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:41,696 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:41,781 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x109f53890>
+2025-07-09 04:50:41,781 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x10a47c8f0>, 49854.90957175)])']
+connector: <aiohttp.connector.TCPConnector object at 0x109f51450>
+2025-07-09 04:50:41,781 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:50:41,781 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:50:41,783 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:41,842 - cache.mtgo - ERROR - Error fetching file list: Connector is closed.
+2025-07-09 04:50:41,843 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:50:41,843 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:50:41,844 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:42,682 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:50:42,682 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:50:42,685 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:50:42,685 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:50:42,685 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:42,686 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:42,773 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:50:42,774 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:50:42,775 - metalyzr.api - INFO - Request completed
+2025-07-09 04:50:42,777 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x109f53890>
+2025-07-09 04:50:42,778 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x109f778f0>, 49855.906100791)])']
+connector: <aiohttp.connector.TCPConnector object at 0x109f52210>
+2025-07-09 04:50:42,778 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:50:42,778 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:50:42,779 - metalyzr.api - INFO - Request completed
+2025-07-09 04:51:24,415 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:51:24,416 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:51:24,644 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:51:24,644 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:51:24,650 - metalyzr.api - INFO - Request completed
+2025-07-09 04:51:32,312 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:51:32,312 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:51:32,401 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:51:32,402 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:51:32,402 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 04:51:32,402 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 04:51:32,429 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 04:51:32,430 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 04:51:32,430 - metalyzr.api - INFO - 📊 Données chargées: 0 tournois, 0 decks, 0 archétypes
+2025-07-09 04:51:32,431 - metalyzr.api - INFO - Nouveau tournoi créé: Weekly Standard Tournament
+2025-07-09 04:51:32,431 - metalyzr.api - INFO - Nouveau tournoi créé: Modern Weekly Challenge
+2025-07-09 04:51:32,431 - metalyzr.api - INFO - Nouvel archétype créé: Mono-Red Aggro
+2025-07-09 04:51:32,431 - metalyzr.api - INFO - Nouvel archétype créé: Azorius Control
+2025-07-09 04:51:32,431 - metalyzr.api - INFO - Nouvel archétype créé: Simic Ramp
+2025-07-09 04:51:32,431 - metalyzr.api - INFO - Données d'exemple initialisées
+2025-07-09 04:51:32,431 - metalyzr.api - INFO - Request completed
+2025-07-09 04:51:38,558 - metalyzr.api - INFO - Request completed
+2025-07-09 04:51:42,757 - metalyzr.api - INFO - Request completed
+2025-07-09 05:00:35,563 - metalyzr.api - INFO - Request completed
+2025-07-09 05:00:45,274 - metalyzr.api - INFO - Request completed
+2025-07-09 05:00:51,608 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:00:51,839 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:00:51,840 - metalyzr.api - INFO - Request completed
+2025-07-09 05:01:02,547 - metalyzr.api - INFO - Nouveau tournoi créé: Standard Championship - January 2025
+2025-07-09 05:01:02,547 - metalyzr.api - INFO - Request completed
+2025-07-09 05:02:16,625 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:02:17,193 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr avec cache MTGODecklistCache...
+2025-07-09 05:02:17,193 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:02:17,193 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:02:17,303 - watchfiles.main - INFO - 4 changes detected
+2025-07-09 05:02:17,462 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:02:17,463 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:02:17,463 - metalyzr.api - INFO - ✅ Cache MTGODecklistCache initialisé avec succès
+2025-07-09 05:02:17,463 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x10370d6a0>
+2025-07-09 05:02:17,463 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x1036ef470>, 50550.584626)])']
+connector: <aiohttp.connector.TCPConnector object at 0x10370d7f0>
+2025-07-09 05:02:17,463 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:02:17,464 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:02:17,550 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:02:17,550 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:02:17,550 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:02:17,550 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:02:17,577 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:02:17,577 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:02:17,577 - metalyzr.api - INFO - 📊 Données chargées: 0 tournois, 0 decks, 0 archétypes
+2025-07-09 05:02:48,700 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:02:49,159 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr avec cache MTGODecklistCache...
+2025-07-09 05:02:49,160 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:02:49,160 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:02:49,313 - watchfiles.main - INFO - 4 changes detected
+2025-07-09 05:02:49,410 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:02:49,410 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:02:49,410 - metalyzr.api - INFO - ✅ Cache MTGODecklistCache initialisé avec succès
+2025-07-09 05:02:49,410 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x10440d940>
+2025-07-09 05:02:49,411 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x1043ef470>, 50582.531595666)])']
+connector: <aiohttp.connector.TCPConnector object at 0x10440da90>
+2025-07-09 05:02:49,411 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:02:49,411 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:02:49,502 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:02:49,502 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:02:49,502 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:02:49,502 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:02:49,531 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:02:49,531 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:02:49,531 - metalyzr.api - INFO - 📊 Données chargées: 0 tournois, 0 decks, 0 archétypes
+2025-07-09 05:03:00,550 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:03:01,005 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr avec cache MTGODecklistCache...
+2025-07-09 05:03:01,005 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:03:01,005 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:03:01,096 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:03:01,096 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:03:01,096 - metalyzr.api - INFO - ✅ Cache MTGODecklistCache initialisé avec succès
+2025-07-09 05:03:01,096 - asyncio - ERROR - Unclosed client session
+client_session: <aiohttp.client.ClientSession object at 0x105c29940>
+2025-07-09 05:03:01,096 - asyncio - ERROR - Unclosed connector
+connections: ['deque([(<aiohttp.client_proto.ResponseHandler object at 0x105c0b470>, 50594.217818166)])']
+connector: <aiohttp.connector.TCPConnector object at 0x105c29a90>
+2025-07-09 05:03:01,096 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:03:01,096 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:03:01,165 - watchfiles.main - INFO - 4 changes detected
+2025-07-09 05:03:01,181 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:03:01,181 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:03:01,181 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:03:01,181 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:03:01,209 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:03:01,209 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:03:01,209 - metalyzr.api - INFO - 📊 Données chargées: 0 tournois, 0 decks, 0 archétypes
+2025-07-09 05:03:17,034 - metalyzr.api - INFO - 🚀 Démarrage du backend Metalyzr sécurisé...
+2025-07-09 05:03:17,034 - metalyzr.api - INFO - 📊 API disponible sur http://localhost:8000
+2025-07-09 05:03:17,034 - metalyzr.api - INFO - 🏥 Health check: http://localhost:8000/health
+2025-07-09 05:03:17,034 - metalyzr.api - INFO - 📈 Stats: http://localhost:8000/api/stats
+2025-07-09 05:03:17,034 - metalyzr.api - INFO - 💾 Cache sync: http://localhost:8000/api/cache/sync
+2025-07-09 05:03:17,034 - metalyzr.api - INFO - 📊 Metrics: http://localhost:8000/metrics
+2025-07-09 05:03:17,034 - metalyzr.api - INFO - 📚 Documentation: http://localhost:8000/docs
+2025-07-09 05:03:17,305 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:03:21,857 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:03:21,857 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:03:22,063 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:03:22,064 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:03:22,065 - metalyzr.api - INFO - Request completed
+2025-07-09 05:03:32,250 - cache.mtgo - INFO - Initializing MTGODecklistCache...
+2025-07-09 05:03:32,251 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:03:32,356 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:03:32,356 - cache.mtgo - INFO - Cache initialized with 0 active tournaments
+2025-07-09 05:03:32,357 - metalyzr.api - INFO - Request completed
+2025-07-09 05:03:38,542 - metalyzr.api - INFO - Request completed
+2025-07-09 05:03:44,076 - metalyzr.api - INFO - Request completed
+2025-07-09 05:03:49,268 - metalyzr.api - INFO - Request completed
+2025-07-09 05:09:14,498 - cache.mtgo - INFO - Syncing MTGODecklistCache from GitHub...
+2025-07-09 05:09:14,733 - cache.mtgo - WARNING - No current tournament files found
+2025-07-09 05:09:14,735 - metalyzr.api - INFO - Request completed
+2025-07-09 05:13:51,007 - watchfiles.main - INFO - 2 changes detected
+2025-07-09 05:13:51,567 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:13:56,661 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:14:01,490 - watchfiles.main - INFO - 15 changes detected
+2025-07-09 05:14:56,121 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:14:58,922 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:14:59,290 - watchfiles.main - INFO - 4 changes detected
+2025-07-09 05:14:59,649 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:15:00,245 - watchfiles.main - INFO - 3 changes detected
+2025-07-09 05:16:22,806 - watchfiles.main - INFO - 1 change detected
+2025-07-09 05:16:28,046 - watchfiles.main - INFO - 1 change detected

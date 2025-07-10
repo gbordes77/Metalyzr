@@ -1,0 +1,21 @@
+{
+  "name": "Burn",
+  "include_color_in_name": true,
+  "conditions": [
+    {
+      "type": "InMainboard",
+      "cards": [
+        "Lightning Bolt"
+      ]
+    },
+    {
+      "type": "OneOrMoreInMainboard",
+      "cards": [
+        "Monastery Swiftspear",
+        "Goblin Guide",
+        "Eidolon of the Great Revel"
+      ]
+    }
+  ],
+  "variants": []
+}

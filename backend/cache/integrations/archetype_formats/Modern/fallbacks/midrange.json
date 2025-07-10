@@ -1,0 +1,14 @@
+{
+  "name": "Midrange",
+  "common_cards": [
+    "Tarmogoyf",
+    "Dark Confidant",
+    "Liliana of the Veil",
+    "Thoughtseize",
+    "Inquisition of Kozilek",
+    "Lightning Bolt",
+    "Path to Exile",
+    "Fatal Push"
+  ],
+  "minimum_match_percentage": 0.2
+}
