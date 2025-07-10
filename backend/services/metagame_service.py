@@ -11,9 +11,9 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any
 
 # Integrations
-from backend.integrations.badaro_archetype_engine import BadaroArchetypeEngine
-from backend.integrations.melee_client import MeleeAPIClient
-from backend.database import DatabaseClient
+from integrations.badaro_archetype_engine import BadaroArchetypeEngine
+from integrations.melee_client import MeleeAPIClient
+from database import DatabaseClient
 
 logger = logging.getLogger(__name__)
 

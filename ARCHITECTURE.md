@@ -53,7 +53,7 @@ Le backend suit une architecture en couches pour une meilleure séparation des p
 backend/
 ├── main.py                # Point d'entrée de l'application FastAPI, gestion du cycle de vie.
 ├── api/                   # Couche d'exposition (routage HTTP).
-│   └── metagame.py        # Endpoints pour le métagame (/update, /status, /analysis, ...).
+│   └── metagame.py        # Endpoints pour le métagame (/populate-database, /formats, /analysis/*).
 ├── services/              # Couche de logique métier.
 │   └── metagame_service.py  # Orchestre l'ETL : appelle le client Melee.gg, classifie, charge en BDD.
 ├── integrations/          # Clients pour les logiques externes.
@@ -64,19 +64,41 @@ backend/
 └── pyproject.toml         # Gestion des dépendances avec Poetry.
 ```
 
-## 4. Pipeline de Données (ETL)
+## 4. API & Pipeline de Données (ETL)
 
-Le processus d'acquisition et de traitement des données est central et entièrement piloté par le `MetagameService` en utilisant **l'API de Melee.gg**.
+Le processus d'acquisition et de traitement des données est centralisé dans le `MetagameService` et déclenché via des endpoints API spécifiques.
 
-1.  **Extraction (Extract)** :
-    -   Un appel à l'endpoint `POST /api/metagame/update` déclenche le `MetagameService`.
-    -   Le service utilise son `MeleeAPIClient` interne pour appeler directement l'API de Melee.gg.
+### Endpoints de Contrôle
+
+-   `GET /api/v1/metagame/formats`
+    -   **Description** : Renvoie une liste statique des formats de jeu supportés (ex: "Modern", "Pioneer").
+    -   **Usage** : Utilisé par le frontend pour peupler les menus de sélection dans le panneau d'administration.
+
+-   `POST /api/v1/metagame/populate-database`
+    -   **Description** : Déclenche la tâche de fond pour peupler la base de données à partir de Melee.gg. C'est le point d'entrée principal de l'ETL.
+    -   **Paramètres (optionnels)** :
+        -   `format_name` (string) : Pour ne récupérer les tournois que d'un format spécifique.
+        -   `start_date` (date: `YYYY-MM-DD`) : Pour ne récupérer que les tournois joués à partir de cette date.
+    -   **Comportement** : Si aucun paramètre n'est fourni, le service récupère les données des formats majeurs sur les 14 derniers jours.
+
+### Processus ETL
+
+1.  **Déclenchement** :
+    -   Un administrateur utilise le panneau d'administration du frontend.
+    -   Le frontend envoie une requête à l'endpoint `POST /populate-database` avec les filtres désirés.
+2.  **Extraction (Extract)** :
+    -   Le `MetagameService` reçoit la requête.
+    -   Il utilise son `MeleeAPIClient` pour appeler l'API de Melee.gg en filtrant par format et date si spécifié.
     -   Il récupère les données structurées des tournois, y compris les **listes de decks, les joueurs, les rondes et les résultats des matchs**.
-2.  **Transformation (Transform)** :
+3.  **Transformation (Transform)** :
     -   Pour chaque deck récupéré, le `MetagameService` fait appel au `BadaroArchetypeEngine` pour déterminer son archétype probable.
-3.  **Chargement (Load)** :
+4.  **Chargement (Load)** :
     -   Le service se connecte à la base de données PostgreSQL via le `DatabaseClient`.
-    -   Il insère de manière transactionnelle l'ensemble des données (tournois, decks, cartes, **matchs**) dans les tables relationnelles.
+    -   Il insère de manière transactionnelle l'ensemble des données (tournois, decks, cartes, **matchs**) dans les tables relationnelles, en évitant les doublons.
+
+### Endpoints d'Analyse
+
+-   `/analysis/*` : Une série d'endpoints (`/metagame_share`, `/winrate_confidence`, etc.) qui effectuent des requêtes SQL complexes sur la base de données pour fournir les données agrégées au frontend.
 
 ## 5. Schéma de la Base de Données
 

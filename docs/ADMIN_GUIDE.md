@@ -1,354 +1,98 @@
-# 👨‍💼 Guide d'Administration - Metalyzr MVP
-
-**Administration complète de la plateforme avec intégrations réelles**
+# 👨‍💼 Guide d'Administration - Metalyzr
 
 ---
 
 ## 🚀 Vue d'Ensemble
 
-Metalyzr MVP intègre maintenant **3 projets GitHub réels** :
-- 🗃️ **Jiliac/MTGODecklistCache** : Cache de tournois
-- 🕷️ **fbettega/mtg_decklist_scrapper** : Scraping multi-sites
-- 🎯 **Badaro/MTGOArchetypeParser** : Classification d'archétypes
+Ce guide est destiné aux administrateurs de la plateforme Metalyzr. Il couvre le démarrage des services, la gestion des données et la maintenance de l'application. L'architecture actuelle est basée sur Docker, FastAPI et PostgreSQL, et utilise l'API de **Melee.gg** comme unique source de données.
 
 ---
 
-## 🛠️ Installation Admin
+## 🛠️ Démarrage et Surveillance des Services
 
-### 1. Installation Complète
+### 1. Démarrage complet de l'environnement
+
+L'ensemble de l'application (backend, base de données) est géré par Docker Compose.
 
 ```bash
-# Installation avec intégrations
-./install-integrations.sh
+# Pour démarrer tous les services en arrière-plan
+docker-compose up -d
 
-# Vérification
-./test-integrations.sh
+# Pour vérifier que les conteneurs sont bien en cours d'exécution
+docker-compose ps
 ```
+Vous devriez voir les services `backend` et `db` avec le statut `Up` ou `Running`.
 
 ### 2. Services à Surveiller
 
-| Service | Port | Statut | Health Check |
-|---------|------|--------|--------------|
-| **Backend API** | 8000 | ✅ | `curl http://localhost:8000/health` |
-| **Frontend** | 3000 | ✅ | `curl http://localhost:3000` |
-| **Intégrations** | - | ✅ | `curl http://localhost:8000/api/integrations/status` |
+| Service | Port Interne | Port Externe | URL de Santé |
+|---------|--------------|--------------|--------------|
+| **Backend API** | 8000 | 8000 | `http://localhost:8000/` |
+| **Database** | 5432 | 5432 | (Connexion directe) |
 
----
-
-## 📊 Monitoring et Santé
-
-### 1. Health Checks
-
+Pour vérifier que l'API est fonctionnelle, exécutez :
 ```bash
-# Santé générale
-curl http://localhost:8000/health
-
-# Statut des intégrations
-curl http://localhost:8000/api/integrations/status
-
-# Sites de scraping disponibles
-curl http://localhost:8000/api/integrations/supported-sites
+curl http://localhost:8000/
+# Attendu: {"message":"Welcome to the Metalyzr API"}
 ```
 
-### 2. Métriques Importantes
+### 3. Consulter les Logs
+
+En cas de problème, la première étape est de consulter les logs du service backend.
 
 ```bash
-# Formats supportés
-curl http://localhost:8000/api/integrations/supported-formats
-
-# Statistiques générales
-curl http://localhost:8000/api/stats
-
-# Données de base
-curl http://localhost:8000/api/tournaments
-curl http://localhost:8000/api/archetypes
+# Afficher les logs du backend en temps réel
+docker-compose logs -f backend
 ```
 
 ---
 
-## 🔧 Configuration des Intégrations
+## 📊 Gestion des Données via le Panneau d'Administration
 
-### 1. Cache Jiliac
+La tâche administrative la plus courante est de peupler la base de données avec les derniers tournois. Cette action est désormais centralisée dans une interface graphique simple.
 
-**Paramètres** :
-- **Source** : GitHub MTGODecklistCache
-- **Cache local** : `backend/cache/integrations/jiliac/`
-- **Rafraîchissement** : Manuel via API
+### 1. Accès au Panneau d'Administration
 
-```bash
-# Tester le cache Jiliac
-curl "http://localhost:8000/api/integrations/tournaments/recent?format_name=Modern&days=7"
-```
+-   **URL** : [http://localhost:3000/admin](http://localhost:3000/admin) (en supposant que le frontend tourne localement)
 
-### 2. Scraper MTG
+### 2. Procédure de Récupération des Données
 
-**Sites supportés** :
-- MTGGoldfish
-- MTGTop8
-- EDHRec
-- AetherHub
-- Archidekt
-- Moxfield
-- TappedOut
+Le panneau d'administration vous permet de déclencher le processus de récupération de manière ciblée.
 
-```bash
-# Tester le scraper
-curl -X POST http://localhost:8000/api/integrations/scrape/deck \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://www.mtggoldfish.com/archetype/modern-burn"}'
-```
+1.  **Accédez à la page d'administration.** Vous y trouverez un formulaire de "Peuplement de la base de données".
+2.  **Sélectionnez un format de jeu** dans le menu déroulant (ex: "Modern", "Pioneer"). La liste est automatiquement chargée depuis l'API.
+3.  **(Optionnel) Choisissez une date de début.** Si vous ne souhaitez récupérer que les tournois joués après une certaine date, sélectionnez-la via le calendrier. Si laissé vide, le système récupérera par défaut les tournois des 14 derniers jours.
+4.  **Cliquez sur "Fetch Data".**
 
-### 3. Moteur Badaro
+Le système lancera alors une tâche en arrière-plan pour contacter l'API Melee.gg, récupérer tous les tournois, decks et matchs correspondants à vos critères, classifier les archétypes et charger le tout dans la base de données PostgreSQL.
 
-**Formats configurés** :
-- Modern
-- Standard  
-- Legacy (extensible)
-
-```bash
-# Test de classification
-curl -X POST http://localhost:8000/api/integrations/meta/analysis \
-  -H "Content-Type: application/json" \
-  -d '{"format": "Modern", "days": 7}'
-```
+Un message de notification vous confirmera que la tâche a bien été démarrée. Vous pouvez suivre la progression détaillée dans les logs du backend.
 
 ---
 
-## 🔍 Gestion des Données
+## 🔄 Maintenance
 
-### 1. Sources de Données
+### 1. Arrêter l'environnement
 
-| Source | Type | Rafraîchissement | Cache |
-|--------|------|------------------|-------|
-| **Jiliac GitHub** | Automatique | À la demande | Local |
-| **Sites MTG** | Scraping | À la demande | Local |
-| **Classification** | Engine | Temps réel | Mémoire |
-| **CRUD Manuel** | Interface | Temps réel | JSON |
+Pour arrêter proprement tous les services :
+```bash
+docker-compose down
+```
 
-### 2. Gestion du Cache
+### 2. Forcer une reconstruction des images Docker
+
+Si vous modifiez des dépendances (`pyproject.toml`) ou le `Dockerfile`, vous devez reconstruire l'image du backend.
 
 ```bash
-# Localisation du cache
-ls -la backend/cache/integrations/
-├── jiliac/           # Cache tournois GitHub
-├── scraper/          # Cache pages scrapées
-└── archetype_formats/  # Règles de classification
+docker-compose build
 ```
 
-### 3. Maintenance
+### 3. Accès direct à la Base de Données
+
+Pour des opérations de maintenance avancées, vous pouvez vous connecter directement à la base de données PostgreSQL.
 
 ```bash
-# Nettoyer le cache (si nécessaire)
-rm -rf backend/cache/integrations/jiliac/*
-rm -rf backend/cache/integrations/scraper/*
-
-# Réinstaller les intégrations
-./install-integrations.sh
+# Se connecter au conteneur de la base de données
+docker-compose exec db psql -U user -d metalyzr_db
 ```
-
----
-
-## 🎯 Interface d'Administration
-
-### 1. Accès Admin
-
-- **URL** : http://localhost:3000/admin
-- **Authentification** : Aucune (MVP)
-- **Fonctionnalités** : CRUD + Intégrations
-
-### 2. Opérations Disponibles
-
-**CRUD Basique** :
-- ✅ Créer tournois
-- ✅ Modifier archétypes
-- ✅ Supprimer entrées
-- ✅ Visualiser statistiques
-
-**Intégrations** :
-- ✅ Statut des services
-- ✅ Test des APIs
-- ✅ Monitoring temps réel
-
----
-
-## 🛡️ Sécurité et Limites
-
-### 1. Rate Limiting
-
-**Intégrations** :
-- Scraping : Headers respectueux
-- GitHub : Limite naturelle
-- Classification : Pas de limite
-
-### 2. Gestion d'Erreurs
-
-```bash
-# Logs d'erreurs
-tail -f backend/logs/error.log
-
-# Statut des services
-curl http://localhost:8000/api/integrations/status
-```
-
-### 3. Fallbacks
-
-- **Intégrations indisponibles** → Mode MVP basique
-- **Scraping échoué** → Données cached
-- **Classification échouée** → Fallback couleur
-
----
-
-## 🔄 Workflows Administratifs
-
-### 1. Démarrage Quotidien
-
-```bash
-# 1. Vérifier les services
-curl http://localhost:8000/health
-
-# 2. Tester les intégrations
-curl http://localhost:8000/api/integrations/status
-
-# 3. Vérifier le frontend
-curl http://localhost:3000
-```
-
-### 2. Maintenance Hebdomadaire
-
-```bash
-# 1. Nettoyer les logs
-rm -f backend/logs/*.log
-
-# 2. Tester toutes les intégrations
-./test-integrations.sh
-
-# 3. Vérifier la performance
-curl http://localhost:8000/api/stats
-```
-
-### 3. Résolution de Problèmes
-
-**Problème : Intégrations indisponibles**
-```bash
-# Réinstaller les dépendances
-cd backend
-pip install -r requirements_integrations.txt
-
-# Redémarrer le backend
-python3 main_simple.py
-```
-
-**Problème : Scraping échoué**
-```bash
-# Vérifier les sites supportés
-curl http://localhost:8000/api/integrations/supported-sites
-
-# Tester manuellement
-curl -X POST http://localhost:8000/api/integrations/scrape/deck \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://www.mtggoldfish.com/deck/test"}'
-```
-
----
-
-## 📈 Performance et Optimisation
-
-### 1. Métriques Clés
-
-- **Temps de réponse API** : <200ms
-- **Cache hit rate** : >80%
-- **Disponibilité** : >99%
-
-### 2. Optimisations
-
-```bash
-# Pré-charger le cache
-curl "http://localhost:8000/api/integrations/tournaments/recent"
-
-# Tester la performance
-time curl http://localhost:8000/api/stats
-```
-
----
-
-## 🚀 Extensions Futures
-
-### 1. Ajout de Nouveaux Sites
-
-```python
-# Dans backend/integrations/mtg_scraper.py
-def _scrape_nouveau_site(self, url: str) -> Optional[Dict]:
-    # Votre logique de scraping
-    pass
-
-# Enregistrer dans supported_sites
-self.supported_sites['nouveau-site.com'] = self._scrape_nouveau_site
-```
-
-### 2. Nouveaux Formats
-
-```bash
-# Créer la structure
-mkdir -p backend/cache/integrations/archetype_formats/NOUVEAU_FORMAT/{archetypes,fallbacks}
-
-# Ajouter les règles JSON
-# Voir INTEGRATIONS_REELLES.md pour les détails
-```
-
----
-
-## 📞 Support et Debugging
-
-### 1. Logs Utiles
-
-```bash
-# Logs du backend
-tail -f backend/logs/app.log
-
-# Logs système
-dmesg | tail
-
-# Processus actifs
-ps aux | grep python3
-```
-
-### 2. Tests de Diagnostic
-
-```bash
-# Test complet
-./test-integrations.sh
-
-# Test spécifique
-curl http://localhost:8000/api/integrations/status -v
-```
-
-### 3. Ressources
-
-- **Documentation** : `INTEGRATIONS_REELLES.md`
-- **API Docs** : http://localhost:8000/docs
-- **Quick Start** : `QUICK_START.md`
-
----
-
-## 🏆 Checklist Admin
-
-### Quotidien
-- [ ] Vérifier health checks
-- [ ] Tester les intégrations
-- [ ] Surveiller les logs
-
-### Hebdomadaire
-- [ ] Nettoyer le cache
-- [ ] Tester toutes les APIs
-- [ ] Vérifier la performance
-
-### Mensuel
-- [ ] Mettre à jour les dépendances
-- [ ] Réviser la documentation
-- [ ] Analyser les métriques
-
----
-
-**✅ Metalyzr MVP est maintenant une plateforme complète avec administration simplifiée !**
-
-**Pour toute question : voir la documentation complète ou tester les APIs directement.** 
+Depuis cet interpréteur, vous pouvez exécuter des requêtes SQL pour inspecter les données, effectuer des sauvegardes ou des restaurations. 

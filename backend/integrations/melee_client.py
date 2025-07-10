@@ -9,7 +9,7 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime, timedelta
 import json
 import os
-from config import config
+# from config import config  <- This seems to be an unused and problematic import
 
 class MeleeAPIClient:
     """Client pour l'API Melee.gg"""
