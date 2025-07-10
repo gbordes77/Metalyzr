@@ -22,3 +22,9 @@ build/
 
 # Mac
 .DS_Store 
+
+# Data files
+data/
+*.log
+logs/
+.DS_Store 

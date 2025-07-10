@@ -6,23 +6,21 @@ Service to manage the Metagame data pipeline.
 """
 import logging
 import asyncio
+import json
 from datetime import datetime, date
 from typing import Dict, List, Any, Optional
 
 # Integrations
-from integrations.startgg_client import StartGGClient
-# Removed MTGGoldfish scraper
+from integrations.decklist_cache_reader import DecklistCacheReader
 from integrations.badaro_archetype_engine import BadaroArchetypeEngine
 from database import DatabaseClient
 
 logger = logging.getLogger(__name__)
 
 class MetagameService:
-    """Service to manage the metagame data pipeline using Melee.gg API."""
-    
     def __init__(self, database_client: DatabaseClient, task_status_dict: Dict[str, Any]):
         self.db_client = database_client
-        self.startgg_client = StartGGClient()
+        self.cache_reader = DecklistCacheReader() # Use the new cache reader
         self.archetype_engine = BadaroArchetypeEngine()
         self.task_status = task_status_dict
 
@@ -37,35 +35,31 @@ class MetagameService:
     async def update_metagame_data(self, format_name: Optional[str] = "standard", start_date: Optional[date] = None):
         try:
             self.task_status.update({"status": "running", "error": None})
-            days_to_fetch = (datetime.now().date() - start_date).days if start_date else 7
             
-            # --- Step 1: Fetch from start.gg ---
-            self._update_status(0, 1, "Fetching tournaments from start.gg...")
-            startgg_tournaments = await self.startgg_client.get_tournaments_by_game(days_ago=days_to_fetch)
-            logger.info(f"Found {len(startgg_tournaments)} tournaments on start.gg.")
+            self._update_status(0, 1, "Reading tournaments from local cache...")
+            
+            tournaments = list(self.cache_reader.get_all_tournaments())
+            total_tournaments = len(tournaments)
 
-            all_tournaments = startgg_tournaments
-            
-            if not all_tournaments:
-                self._update_status(1, 1, "No new tournaments found from any source.")
+            if not tournaments:
+                self._update_status(1, 1, "No tournaments found in the cache.")
                 self.task_status.update({"status": "completed"})
                 return
 
-            # --- Step 2: Process all tournaments ---
-            total_tournaments = len(all_tournaments)
-            self._update_status(0, total_tournaments, f"Processing {total_tournaments} found tournaments...")
+            logger.info(f"Found {total_tournaments} total tournaments in the cache.")
             
-            processed_count = 0
-            for tournament_data in all_tournaments:
-                await self.db_client.save_tournament(tournament_data)
-                processed_count += 1
-                self._update_status(processed_count, total_tournaments, f"Saved tournament {processed_count}/{total_tournaments}: {tournament_data.get('name')}")
+            # Here we would normally insert into DB, for now, we just log them.
+            # This part will be completed in the next steps (Transform/Load).
+            for i, tournament in enumerate(tournaments):
+                self._update_status(i + 1, total_tournaments, f"Processing tournament: {tournament.get('name', 'Unknown')}")
+                logger.info(f"Processing tournament from source '{tournament.get('source')}': {tournament.get('name')}")
+                await asyncio.sleep(0.01) # Simulate DB work
 
+            self._update_status(total_tournaments, total_tournaments, "Finished processing all tournaments from cache.")
             self.task_status.update({"status": "completed"})
-            logger.info("Metagame data update process completed successfully.")
 
         except Exception as e:
-            logger.error(f"Error updating metagame data: {e}", exc_info=True)
+            logger.exception("An error occurred during metagame data update from cache.")
             self.task_status.update({"status": "failed", "error": str(e)})
 
     def _load_tournament_to_db(self, tournament_data: Dict[str, Any]):
