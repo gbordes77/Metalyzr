@@ -1,21 +1,36 @@
-# 1. Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Stage 1: Builder - To install dependencies
+FROM --platform=linux/amd64 python:3.11-slim as builder
 
-# 2. Set the working directory in the container
+# Set working directory
 WORKDIR /app
 
-# 3. Install Poetry
+# Install Poetry
 RUN pip install "poetry>=1.2.0"
 
-# 4. Copy only the dependency definition files
-COPY pyproject.toml poetry.lock* ./
+# Copy dependency files from the backend directory
+COPY backend/pyproject.toml backend/poetry.lock* ./
 
-# 5. Install project dependencies
+# Install dependencies using Poetry
+# --no-dev: Exclude development dependencies
+# --no-root: Don't install the project itself, only dependencies
 RUN poetry config virtualenvs.create false && \
-    poetry install --no-root --only main
+    poetry install --no-dev --no-root
 
-# 6. Copy the rest of the application's code
-COPY ./backend /app
+# Stage 2: Final image - To run the application
+FROM python:3.11-slim
 
-# 7. Expose the port the app runs on
-EXPOSE 8000 
+# Set working directory
+WORKDIR /app
+
+# Copy installed dependencies from the builder stage
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /usr/local/bin /usr/local/bin
+
+# Copy the application code from the backend directory
+COPY ./backend /app/
+
+# Expose the port the app runs on
+EXPOSE 8000
+
+# Command to run the application
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 

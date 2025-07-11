@@ -1,3 +1,0 @@
-[submodule "scrapers/mtg_decklist_scrapper"]
-	path = scrapers/mtg_decklist_scrapper
-	url = https://github.com/fbettega/mtg_decklist_scrapper.git

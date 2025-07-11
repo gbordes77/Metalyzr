@@ -46,16 +46,24 @@ class MetagameService:
                 self.task_status.update({"status": "completed"})
                 return
 
-            logger.info(f"Found {total_tournaments} total tournaments in the cache.")
+            logger.info(f"Found {total_tournaments} total tournaments. Inserting into database...")
             
-            # Here we would normally insert into DB, for now, we just log them.
-            # This part will be completed in the next steps (Transform/Load).
-            for i, tournament in enumerate(tournaments):
-                self._update_status(i + 1, total_tournaments, f"Processing tournament: {tournament.get('name', 'Unknown')}")
-                logger.info(f"Processing tournament from source '{tournament.get('source')}': {tournament.get('name')}")
-                await asyncio.sleep(0.01) # Simulate DB work
+            saved_count = 0
+            for i, tournament_data in enumerate(tournaments):
+                tournament_id = self.db_client.save_tournament(tournament_data)
+                
+                if tournament_id:
+                    logger.info(f"Successfully saved tournament '{tournament_data.get('Tournament', {}).get('Name')}' with ID {tournament_id}")
+                    saved_count += 1
+                    
+                    # Now, save the decks for this tournament, using the correct key 'Decks'
+                    for deck_data in tournament_data.get('Decks', []):
+                        self.db_client.save_deck_and_cards(deck_data, tournament_id)
 
-            self._update_status(total_tournaments, total_tournaments, "Finished processing all tournaments from cache.")
+                self._update_status(i + 1, total_tournaments, f"Processing tournament: {tournament_data.get('Tournament', {}).get('Name', 'Unknown')}")
+                await asyncio.sleep(0.001)
+
+            self._update_status(total_tournaments, total_tournaments, f"Finished processing. Saved {saved_count}/{total_tournaments} new tournaments.")
             self.task_status.update({"status": "completed"})
 
         except Exception as e:
@@ -154,8 +162,34 @@ class MetagameService:
                     logger.error(f"Error loading tournament to DB for '{tournament_data.get('name')}'. Rolling back. Error: {e}", exc_info=True)
                     conn.rollback()
 
-    def get_service_status(self) -> Dict[str, Any]:
-        return {"status": "active", "source": "Melee.gg"}
+    async def get_available_formats(self) -> list[str]:
+        """
+        Retrieves a list of distinct format names from the database.
+        """
+        logger.info("Fetching available formats from the database.")
+        formats = self.db_client.get_all_formats()
+        # The result from DB is a list of tuples, e.g., [('Standard',), ('Modern',)], flatten it.
+        return [item[0] for item in formats if item]
+
+    async def get_metagame_analysis(self, format_name: str) -> Optional[Dict[str, Any]]:
+        """
+        Retrieves and calculates metagame analysis for a given format.
+        """
+        logger.info(f"Fetching metagame analysis for format: {format_name}")
+        analysis_results = self.db_client.get_metagame_by_format(format_name)
+        if not analysis_results:
+            return None
+        
+        # We can perform additional processing or formatting here if needed.
+        # For now, we'll return the direct data from the database.
+        # The structure will be a list of dictionaries, each representing an archetype.
+        return {
+            "format": format_name,
+            "archetypes": analysis_results
+        }
+
+    def get_task_status(self) -> Dict[str, Any]:
+        return self.task_status
         
     def close(self):
         logger.info("MetagameService is shutting down.") 

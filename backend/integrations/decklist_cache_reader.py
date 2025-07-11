@@ -8,42 +8,42 @@ logger = logging.getLogger(__name__)
 
 class DecklistCacheReader:
     """
-    Reads tournament data from the file-based MTG_decklistcache.
-    The structure is expected to be: <cache_root>/<source>/<year>/<month>/<day>/<tournament_file>.json
+    Reads Magic: The Gathering decklist data from a local cache of JSON files.
+    The cache is expected to be a directory containing one JSON file per tournament.
     """
     def __init__(self, cache_root: str = "data/MTG_decklistcache"):
-        self.cache_path = Path(cache_root)
-        if not self.cache_path.exists() or not self.cache_path.is_dir():
-            raise FileNotFoundError(f"The cache directory was not found at {cache_root}")
-
-    def _read_json_file(self, file_path: Path) -> Dict[str, Any]:
-        """Reads a single JSON file and returns its content."""
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except (json.JSONDecodeError, IOError) as e:
-            logger.error(f"Failed to read or parse {file_path}: {e}")
-            return {}
+        self.cache_root = cache_root
+        if not os.path.isdir(self.cache_root):
+            raise FileNotFoundError(f"The cache directory was not found at {self.cache_root}")
 
     def get_all_tournaments(self) -> Iterator[Dict[str, Any]]:
         """
-        Walks the cache directory and yields tournament data from each JSON file.
+        Yields all tournaments found in the cache directory, searching recursively.
         """
-        logger.info(f"Starting to read tournaments from cache at {self.cache_path}...")
-        if not self.cache_path.exists():
-            logger.error("Cache path does not exist.")
-            return
+        for subdir, _, files in os.walk(self.cache_root):
+            for filename in files:
+                if filename.endswith(".json"):
+                    filepath = os.path.join(subdir, filename)
+                    try:
+                        with open(filepath, 'r') as f:
+                            data = json.load(f)
+                            # Let's add the filename as a potential UID, as it's unique
+                            data['UID'] = os.path.splitext(filename)[0]
 
-        for file_path in self.cache_path.glob('**/*.json'):
-            if "archetype" in file_path.name:
-                continue # Skip archetype definition files for now
+                            # Extract source from the file path, which looks like:
+                            # .../Tournaments/{source}/{...}/{file}.json
+                            try:
+                                path_parts = filepath.split(os.sep)
+                                tournaments_index = path_parts.index('Tournaments')
+                                if len(path_parts) > tournaments_index + 1:
+                                    source = path_parts[tournaments_index + 1]
+                                    if 'Tournament' in data and 'Source' not in data['Tournament']:
+                                        data['Tournament']['Source'] = source
+                            except (ValueError, IndexError):
+                                logger.warning(f"Could not extract source from path for {filepath}")
 
-            tournament_data = self._read_json_file(file_path)
-            if tournament_data:
-                # Add source from file path, as it's not in the JSON
-                try:
-                    source = file_path.parts[-5]
-                    tournament_data['source'] = source
-                except IndexError:
-                     tournament_data['source'] = 'unknown'
-                yield tournament_data 
+                            yield data
+                    except json.JSONDecodeError:
+                        logger.warning(f"Could not decode JSON from {filepath}")
+                    except Exception as e:
+                        logger.error(f"Error reading tournament from {filepath}: {e}") 
