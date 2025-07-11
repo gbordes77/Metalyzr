@@ -1,8 +1,5 @@
 import logging
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
-from playwright.async_api import async_playwright
-
 from .database import engine, Base
 from .api.v1.endpoints import metagame
 from . import models
@@ -15,21 +12,7 @@ logger = logging.getLogger(__name__)
 # In a real production app, you'd use Alembic migrations for this.
 models.Base.metadata.create_all(bind=engine)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Startup
-    print("Application startup...")
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        app.state.browser = browser
-        print("Playwright browser launched and stored in app state.")
-        yield
-    # Shutdown
-    print("Application shutdown...")
-    await app.state.browser.close()
-    print("Playwright browser closed.")
-
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(title="Metalyzr API")
 
 app.include_router(metagame.router, prefix="/api/v1")
 
