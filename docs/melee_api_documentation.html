@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse de la Communication avec Melee.gg</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            background-color: #f9f9f9;
+        }
+        h1, h2, h3 {
+            color: #1a202c;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        h1 { font-size: 2.5em; }
+        h2 { font-size: 2em; margin-top: 40px; }
+        h3 { font-size: 1.5em; margin-top: 30px; border-bottom: 1px solid #e2e8f0; }
+        code {
+            background-color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #1a202c;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+            font-size: 0.85em;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #cbd5e0;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f1f5f9;
+            font-weight: bold;
+        }
+        .note {
+            background-color: #feebc8;
+            border-left: 5px solid #dd6b20;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .method-post { color: #38a169; font-weight: bold; }
+        .method-get  { color: #3182ce; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Analyse de la Communication avec Melee.gg</h1>
+    <div class="note">
+        <p><strong>Contexte important :</strong> Melee.gg ne fournit pas d'API publique officielle. Cette documentation est le résultat d'une analyse (reverse-engineering) du code du scraper <code>fbettega/mtg_decklist_scrapper</code>. Le processus imite le comportement d'un navigateur web et interagit avec des points d'accès internes (non documentés) que le site utilise pour son propre fonctionnement.</p>
+    </div>
+
+    <h2>Flux Général de la Communication</h2>
+    <p>La stratégie est une simulation de session utilisateur classique :</p>
+    <ol>
+        <li><strong>Authentification :</strong> Le script s'identifie avec un email et un mot de passe pour obtenir un cookie de session.</li>
+        <li><strong>Collecte de Données :</strong> Le cookie de session est ensuite utilisé pour toutes les requêtes suivantes, prouvant au serveur que les requêtes sont légitimes et proviennent d'un utilisateur connecté.</li>
+    </ol>
+
+    <hr>
+
+    <h2>Étape 1 : Le Flux d'Authentification</h2>
+    <p>L'objectif est d'obtenir le cookie <code>.AspNet.ApplicationCookie</code>, qui sert de jeton de session pour toutes les actions ultérieures.</p>
+
+    <h3>1.1. Récupération du Jeton Anti-Falsification (CSRF)</h3>
+    <p>Avant même de pouvoir se connecter, le script doit récupérer un jeton de sécurité que le site utilise pour se protéger contre les attaques de type Cross-Site Request Forgery (CSRF).</p>
+    <ul>
+        <li><strong>Méthode :</strong> <span class="method-get">GET</span></li>
+        <li><strong>Endpoint :</strong> <code>https://melee.gg/Account/SignIn</code></li>
+        <li><strong>Objectif :</strong> Charger la page de connexion pour en extraire une valeur cachée.</li>
+        <li><strong>Réponse Attendue :</strong> Une page HTML complète. Le script recherche une balise spécifique :
+            <pre>&lt;input name="__RequestVerificationToken" type="hidden" value="..." /&gt;</pre>
+            La valeur de l'attribut <code>value</code> est le jeton CSRF.
+        </li>
+    </ul>
+
+    <h3>1.2. Soumission des Identifiants</h3>
+    <p>Avec le jeton CSRF, le script peut maintenant envoyer les identifiants de connexion.</p>
+    <ul>
+        <li><strong>Méthode :</strong> <span class="method-post">POST</span></li>
+        <li><strong>Endpoint :</strong> <code>https://melee.gg/Account/SignInPassword</code></li>
+        <li><strong>Données Envoyées (Payload) :</strong> Le corps de la requête contient les champs d'un formulaire.</li>
+    </ul>
+    <table>
+        <thead>
+            <tr><th>Clé du Payload</th><th>Description</th><th>Exemple de Valeur</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>email</code></td><td>L'adresse e-mail du compte dédié.</td><td><code>"api.user@example.com"</code></td></tr>
+            <tr><td><code>password</code></td><td>Le mot de passe du compte.</td><td><code>"SuperS3cret!"</code></td></tr>
+            <tr><td><code>__RequestVerificationToken</code></td><td>Le jeton CSRF récupéré à l'étape 1.1.</td><td>(Une longue chaîne de caractères)</td></tr>
+        </tbody>
+    </table>
+    <ul>
+        <li><strong>Réponse Attendue :</strong> Un objet JSON.
+            <ul>
+                <li><strong>En cas de succès :</strong> Le JSON indique qu'il n'y a pas d'erreur, et surtout, le serveur renvoie un en-tête <code>Set-Cookie</code> qui contient le précieux cookie de session <code>.AspNet.ApplicationCookie</code>.</li>
+                <li><strong>En cas d'échec :</strong> Le JSON contiendra un indicateur d'erreur.
+                    <pre>{"Error":true, "Message":"Invalid email or password..."}</pre>
+                </li>
+            </ul>
+        </li>
+    </ul>
+
+    <hr>
+
+    <h2>Étape 2 : Le Flux de Récupération des Données</h2>
+    <p>Une fois le cookie de session obtenu, le script peut commencer à collecter les données des tournois.</p>
+
+    <h3>2.1. Récupération de la Liste des Tournois</h3>
+    <p>Cette requête demande la liste des tournois pour une période et des filtres donnés.</p>
+    <ul>
+        <li><strong>Méthode :</strong> <span class="method-post">POST</span></li>
+        <li><strong>Endpoint :</strong> <code>https://melee.gg/Tournament/ViewTournaments</code></li>
+        <li><strong>Authentification :</strong> Le cookie <code>.AspNet.ApplicationCookie</code> doit être inclus dans les en-têtes de la requête.</li>
+        <li><strong>Données Envoyées (Payload) :</strong></li>
+    </ul>
+    <table>
+        <thead>
+            <tr><th>Clé du Payload</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>startDate</code></td><td>Date de début de la recherche (format: <code>YYYY-MM-DD</code>).</td></tr>
+            <tr><td><code>endDate</code></td><td>Date de fin de la recherche.</td></tr>
+            <tr><td><code>name</code></td><td>Filtre par nom de tournoi (optionnel).</td></tr>
+            <tr><td><code>format</code></td><td>Filtre par format de jeu (ex: "Modern", "Standard").</td></tr>
+            <tr><td><code>page</code>, <code>pageSize</code>, <code>sort</code></td><td>Paramètres de pagination et de tri.</td></tr>
+        </tbody>
+    </table>
+    <ul>
+        <li><strong>Information Retournée :</strong> Un objet JSON contenant une liste (<code>data</code>) de tournois. Chaque tournoi est un objet avec des informations de base comme :
+            <pre>{
+    "id": 12345,
+    "name": "Modern Challenge #1",
+    "organizer": "Organizer Name",
+    "start_date": "2024-07-15T18:00:00Z",
+    "formats": ["Modern"],
+    ...
+}</pre>
+        </li>
+    </ul>
+
+    <h3>2.2. Récupération des Classements et Joueurs d'un Tournoi</h3>
+    <p>Pour un tournoi donné, le script récupère les classements (standings) d'une ronde spécifique.</p>
+    <ul>
+        <li><strong>Méthode :</strong> <span class="method-post">POST</span></li>
+        <li><strong>Endpoint :</strong> <code>https://melee.gg/Tournament/GetRoundStandings</code></li>
+        <li><strong>Authentification :</strong> Cookie de session requis.</li>
+        <li><strong>Données Envoyées (Payload) :</strong></li>
+    </ul>
+    <table>
+        <thead>
+            <tr><th>Clé du Payload</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>tournamentId</code></td><td>L'ID du tournoi (obtenu à l'étape 2.1).</td></tr>
+            <tr><td><code>roundId</code></td><td>L'ID de la ronde (souvent la dernière ronde complétée).</td></tr>
+            <tr><td><code>start</code></td><td>Index de départ pour la pagination (ex: 0, 50, 100).</td></tr>
+        </tbody>
+    </table>
+    <ul>
+        <li><strong>Information Retournée :</strong> Un objet JSON avec une liste (<code>data</code>) de joueurs. Chaque joueur est un objet contenant son rang, son nom, ses points, ses victoires/défaites/nuls, etc.
+            <pre>{
+    "Rank": 1,
+    "Team": { "Players": [{ "DisplayName": "Player One" }] },
+    "Points": 24,
+    "MatchWins": 8,
+    "MatchLosses": 1,
+    "MatchDraws": 0,
+    ...
+}</pre>
+        </li>
+    </ul>
+
+    <h3>2.3. Récupération d'une Decklist</h3>
+    <p>Enfin, pour obtenir la composition d'un deck, le script visite simplement la page publique du deck.</p>
+     <ul>
+        <li><strong>Méthode :</strong> <span class="method-get">GET</span></li>
+        <li><strong>Endpoint :</strong> <code>https://melee.gg/Decklist/View/{deckId}</code></li>
+        <li><strong>Authentification :</strong> Généralement non requise pour les decks publics, mais l'envoi du cookie assure l'accès si la liste a des restrictions.</li>
+        <li><strong>Information Retournée :</strong> Une page HTML complète. Le script doit ensuite "parser" cette page (avec une bibliothèque comme BeautifulSoup) pour extraire les noms et les quantités des cartes de la liste de deck.</li>
+    </ul>
+
+</body>
+</html> 
