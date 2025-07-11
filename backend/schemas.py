@@ -1,14 +1,21 @@
 from pydantic import BaseModel
-from typing import List
+from typing import Optional
+from datetime import datetime
 
-class MetagameShare(BaseModel):
-    archetype: str
-    deck_count: int
-    prevalence: float
+class TournamentBase(BaseModel):
+    uuid: str
+    name: str
+    format: Optional[str] = None
+    source: str
+    url: Optional[str] = None
+    decks_count: Optional[int] = None
+
+class TournamentCreate(TournamentBase):
+    pass
+
+class Tournament(TournamentBase):
+    id: int
+    date: Optional[str] = None # Keep as string to match model
 
     class Config:
-        orm_mode = True
-
-class MetagameResponse(BaseModel):
-    data: List[MetagameShare]
-    total_decks: int 
+        orm_mode = True 

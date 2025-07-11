@@ -1,30 +1,37 @@
 import logging
 from fastapi import FastAPI
-from api.v1.endpoints import metagame
-from database import init_db
-import os
+from contextlib import asynccontextmanager
+from playwright.async_api import async_playwright
+
+from .database import engine, Base
+from .api.v1.endpoints import metagame
+from . import models
 
 # Basic logging configuration
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Initialize FastAPI app
-app = FastAPI(title="Metalyzr API", version="1.0.0")
+# Create all tables in the database on startup
+# In a real production app, you'd use Alembic migrations for this.
+models.Base.metadata.create_all(bind=engine)
 
-# Include the API router
-# Note: The path to the router might need adjustment after full refactoring
-app.include_router(metagame.router, prefix="/api/v1/metagame", tags=["Metagame Analysis"])
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    print("Application startup...")
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        app.state.browser = browser
+        print("Playwright browser launched and stored in app state.")
+        yield
+    # Shutdown
+    print("Application shutdown...")
+    await app.state.browser.close()
+    print("Playwright browser closed.")
 
-@app.on_event("startup")
-def startup_event():
-    """On startup, initialize the database."""
-    logger.info("Metalyzr API starting up.")
-    init_db()
+app = FastAPI(lifespan=lifespan)
 
-@app.on_event("shutdown")
-def shutdown_event():
-    """On shutdown, log a message."""
-    logger.info("Metalyzr API shutting down.")
+app.include_router(metagame.router, prefix="/api/v1")
 
 @app.get("/")
 def read_root():

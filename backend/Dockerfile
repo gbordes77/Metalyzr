@@ -1,28 +1,34 @@
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim
+# Stage 1: Build dependencies
+FROM python:3.11-slim as builder
 
-# Set the working directory in the container
+# Install poetry
+RUN pip install poetry
+
+# Copy dependency files
+WORKDIR /app
+COPY backend/pyproject.toml backend/poetry.lock* ./
+
+# Install dependencies, including dev for playwright install command
+RUN poetry install --no-root
+
+# Install Playwright browsers
+RUN poetry run playwright install --with-deps
+# We use --with-deps to let it handle system dependencies
+
+# Now, create the final image from the python-base
+FROM python:3.11-slim as final
+
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies that might be needed
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+# Copy installed dependencies and browsers from the builder stage
+COPY --from=builder /app /app
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
+COPY --from=builder /root/.cache/ms-playwright /root/.cache/ms-playwright
 
-# Install Poetry
-RUN pip install "poetry>=1.2.0"
+# Copy application code
+COPY ./backend /app
 
-# Copy the dependency files
-COPY pyproject.toml poetry.lock* ./
-
-# Let Poetry handle the installation.
-# This is the most reliable method as it uses the lock file to create the venv.
-# We turn off venv creation in favor of managing it globally in the container.
-RUN poetry config virtualenvs.create false && \
-    poetry install --no-root --only main
-
-# Copy the rest of the application's code
-COPY . .
-
-# Command to run the application using the installed dependencies
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+# Expose port and command
+EXPOSE 8000
+CMD ["poetry", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 
