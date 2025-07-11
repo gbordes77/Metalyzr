@@ -1,44 +1,42 @@
-# État des Lieux du Projet Metalyzr - 11 Juillet 2024
+# État des Lieux - Metalyzr (10 Juillet 2024)
 
-## Objectif Initial
+## Contexte et Objectif
 
-Refondre le projet Metalyzr en un MVP fonctionnel capable de récupérer, d'analyser et d'afficher des données réelles de métagame pour Magic: The Gathering, en se basant sur des sources de données fiables.
+La mission est de rendre le projet Metalyzr, initialement dans un état de chaos organisationnel, pleinement opérationnel. Après une restructuration majeure (dépendances, Docker, base de données, CI/CD), un obstacle majeur a été rencontré.
 
-## ✅ Ce qui est fonctionnel et stable
+## Problème Majeur Rencontré
 
-1.  **Architecture Docker :**
-    *   Un environnement `docker-compose` a été mis en place et est maintenant **stable**.
-    *   Il orchestre les services nécessaires : un backend en **FastAPI**, une base de données **PostgreSQL**, et le frontend.
-    *   Les `Dockerfile` et `docker-compose.yml` ont été débogués et simplifiés pour assurer des constructions fiables.
+Le build de l'image Docker du backend échoue systématiquement sur l'environnement de l'utilisateur (macOS ARM64) à l'étape `poetry install`. Malgré de multiples corrections du `Dockerfile` et des tentatives de purges de cache, le problème persiste, indiquant un souci d'environnement local profond lié à Docker Desktop sur ARM64.
 
-2.  **Backend et Base de Données :**
-    *   Le backend FastAPI est structuré avec une architecture modulaire (services, intégrations, API).
-    *   La base de données PostgreSQL est correctement configurée et le backend s'y connecte sans problème au démarrage.
-    *   Les dépendances Python sont gérées proprement via `pyproject.toml` et Poetry.
+## Pivot Stratégique : Exécution Locale
 
-3.  **Connexion à l'API `start.gg` (source pour Melee.gg) :**
-    *   Un client GraphQL **entièrement fonctionnel** pour l'API de `start.gg` a été développé (`backend/integrations/startgg_client.py`).
-    *   La clé d'API fournie par l'utilisateur est intégrée de manière sécurisée via les variables d'environnement dans `docker-compose`.
-    *   **Le système est capable de s'authentifier et de récupérer avec succès des listes de tournois depuis l'API `start.gg`**. La connexion est une réussite technique.
+Pour contourner ce blocage et valider l'architecture applicative (base de données, API, collecteurs de données), la décision a été prise de pivoter vers une exécution locale du backend, en abandonnant temporairement son lancement via Docker.
 
-## ❌ Le Point de Blocage Fondamental
+**Actions Réalisées :**
+1.  **Simplification de Docker Compose :** Le fichier `docker-compose.yml` a été modifié pour ne plus gérer que le lancement des services tiers stables : `db` (PostgreSQL) et `redis`.
+2.  **Création d'un Script de Lancement Local :** Un script `start_backend_local.sh` a été créé. Il automatise :
+    *   La création d'un environnement virtuel Python (`backend/.venv_local`).
+    *   L'installation des dépendances du projet via `poetry install`.
+    *   Le lancement du serveur FastAPI avec `uvicorn`.
+3.  **Correction d'Erreurs de Démarrage :**
+    *   Une première `ImportError` concernant `Base` de SQLAlchemy a été corrigée dans `backend/database.py`.
+    *   Le dernier log a montré une nouvelle erreur de `traceback` au moment de la connexion à la base de données. Le débogage était en cours lorsque la session a été interrompue.
 
-Le seul et unique problème qui nous empêche d'avancer est un **problème de source de données**.
+## État Actuel
 
-*   **Le service `start.gg` / `Melee.gg` ne semble plus lister de tournois pour le jeu "Magic: The Gathering"**.
-*   Nos appels à l'API, bien que techniquement réussis, retournent des tournois pour d'autres jeux (Super Smash Bros., Street Fighter, etc.) mais systématiquement **zéro tournoi de Magic**.
-*   Sans une source de données valide, le pipeline de données, bien que fonctionnel, ne peut importer aucune donnée pertinente. L'application reste donc vide.
+- Le code est dans un état où le backend **devrait** pouvoir se lancer localement.
+- Les services `db` et `redis` sont prêts à être lancés via `docker-compose`.
+- Le frontend n'a pas encore été traité et sera la prochaine étape une fois le backend validé.
 
-##  tentativas de Contornar o Bloqueio (tentatives de contournement)
+## Prochaines Étapes Immédiates
 
-Plusieurs alternatives ont été explorées pour trouver une autre source de données, sans succès :
-
-1.  **Scraping de `mtgo.com`** : Le site officiel charge son contenu dynamiquement via JavaScript. Une tentative de scraping avec `requests` & `BeautifulSoup` a échoué. Une tentative plus avancée avec `Selenium` a également échoué, probablement en raison de protections anti-bot.
-2.  **API `magicthegathering.io`** : Ne contient que des données sur les cartes et les éditions, pas de résultats de tournois.
-3.  **API `deckbrew.com`** : Est hors service (erreur SSL).
-
-## Conclusion
-
-Le projet est techniquement sain et prêt à fonctionner. La fondation (Docker, FastAPI, DB, client API) est solide. Le blocage n'est pas technique, mais **stratégique** : il nous manque une source de données fiable et accessible pour les résultats de tournois de Magic.
-
-La prochaine étape cruciale est d'identifier et d'intégrer une telle source. 
+1.  **Lancer les services de base (dans un terminal) :**
+    ```bash
+    docker-compose up
+    ```
+2.  **Lancer le backend (dans un second terminal) :**
+    ```bash
+    ./start_backend_local.sh
+    ```
+3.  **Analyser le traceback :** Le script s'arrêtera probablement sur l'erreur de connexion à la base de données. Il faudra l'analyser pour la résoudre (probablement un problème avec `psycopg2` ou la chaîne de connexion).
+4.  **Valider l'API :** Une fois le serveur démarré, tester l'endpoint [http://localhost:8000/api/v1/tournaments_from_api](http://localhost:8000/api/v1/tournaments_from_api). 

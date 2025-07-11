@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 import os
 from dotenv import load_dotenv
 
@@ -11,4 +12,6 @@ if not DATABASE_URL:
     raise ValueError("No DATABASE_URL set for SQLAlchemy")
 
 engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine) 
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+Base = declarative_base() 
